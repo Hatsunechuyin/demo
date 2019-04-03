@@ -1,0 +1,29 @@
+//https://jingyan.baidu.com/article/359911f5a9e0bc57fe030617.html(matlab GUI怎么设计点击菜单项切换GUI界面？)
+
+
+为方便叙述设第一个GUI文件名为GUI_1，第二个GUI文件名为GUI_2
+具体方法：
+情况一：想打开GUI_2且保留第一个GUI_1：
+先设置GUI_2的Visible为'off'（双击GUI设计界面空白处设置），然后在GUI_1的控件的Callback中写下如下代码：
+c=GUI_2;
+set(c,'Visible','on');
+若想在GUI_2中设置控件关闭GUI_2则可以在该控件的Callback中写下：
+set(handles.Figure2,'Visible','off');
+或：
+close(GUI_2);
+情况二：想打开GUI_2且关闭GUI_1
+原理同情况一，在GUI_1的控件的Callback中写下：
+c=GUI_2;
+set(c,'Visible','on');
+set(handles.Figure1,'Visible','off'); (或：close(GUI_1))
+注：这里默认GUI_1和GUI_2的Tag值分别是Figure1和Figure2，即handes.***中的***是GUI_1和GUI_2的Tag值（也是双击GUI设计界面空白处设置）。
+灵活运用Visible属性是关键。
+
+
+//还需要考虑到多个的情况
+
+
+http://www.ilovematlab.cn/thread-260923-1-1.html数据间的传递
+
+c=handles.uipanel1;
+set(c,'Visible','off');隐藏控件
