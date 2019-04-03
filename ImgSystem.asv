@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 03-Apr-2019 17:33:01
+% Last Modified by GUIDE v2.5 03-Apr-2019 17:04:06
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -240,105 +240,6 @@ function Clear_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 %清除视图图片
-cla(handles.axes1,'reset');  %handles.axes2为显示图片窗口，reset即清除
+cla(handles.axes2,'reset');  %handles.axes2为显示图片窗口，reset即清除
 % 重置清空动态txt的文字
-%set(handles.axes1,'title','');  %handles.edit1为要清除文字的文本框（双击文本框可以看见tag）
-
-
-% --------------------------------------------------------------------
-function Close_Callback(hObject, eventdata, handles)
-% hObject    handle to Close (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-close
-
-
-% --- Executes on mouse press over axes background.
-function axes1_ButtonDownFcn(hObject, eventdata, handles)
-% hObject    handle to axes1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-[file path]=uigetfile('*.bmp;*.jpg;*.png','请选择一幅图像');
-if file==0 warndlg('您得输入一幅图像');
-%警告对话框提示输入合法图像文件
-else
-    I=imread(fullfile(path,file));
-    axes(handles.axes1);
-    imshow(I);title('原图像');
-    handles.I=I;
-end
-%Update handles structure
-guidata(hObject,handles);
-
-% --- Executes on button press in pushbutton2.
-function pushbutton2_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-
-function edit1_Callback(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit1 as text
-%        str2double(get(hObject,'String')) returns contents of edit1 as a double
-%获取text文本框的数字，竖直平移X的数值
-global x;%定义一个x的全局变量
-x=str2num(get(hObject,'String'));
-
-
-% --- Executes during object creation, after setting all properties.
-function edit1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
-%获取text文本框的数字，竖直平移Y的数值
-global y;
-y=str2num(get(hObject,'String'));
-
-% --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in pushbutton3.
-function pushbutton3_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-global y;
-global x;
-I=handles.I;
-axes(handles.axes2);
-se=translate(strel(1),[x y]);  
-j=imdilate(I,se); 
-axes(handles.axes2);
-imshow(j);title('竖直平移后图像');
-
+set(handles.edit1,'string','')；  %handles.edit1为要清除文字的文本框（双击文本框可以看见tag）
