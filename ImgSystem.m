@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 04-Apr-2019 15:58:59
+% Last Modified by GUIDE v2.5 04-Apr-2019 17:07:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -244,6 +244,8 @@ cla(handles.axes1,'reset');  %handles.axes1为显示图片窗口，reset即清除
 cla(handles.axes2,'reset');  %handles.axes2为显示图片窗口，reset即清除
 cla(handles.axes3,'reset');  %handles.axes3为显示图片窗口，reset即清除
 cla(handles.axes4,'reset');  %handles.axes4为显示图片窗口，reset即清除
+%清除设置到的静态文本
+set(handles.text3,'String','');
 % 重置清空动态txt的文字
 %set(handles.axes1,'title','');  %handles.edit1为要清除文字的文本框（双击文本框可以看见tag）
 
@@ -369,18 +371,24 @@ function figure1_KeyPressFcn(hObject, eventdata, handles)
 
 
 % --- Executes on button press in pushbutton4.
+%剪切保留上一次读取到的图片
 function pushbutton4_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 try
-    axes(handles.axes3);%将第三块axes当作剪切对象
-    A=handles.I;
-    [I1,rect]=imcrop(A);
-    title('剪切前','color','r');
-    rectangle('Position',rect,'LineWidth',2,'EdgeColor','r')%显示图像剪切区域(会跳出一个窗体)
-    axes(handles.axes4)
-    imshow(I1);title('选取部分的图像');
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        set(handles.text3,'String','剪切的图片');
+        axes(handles.axes3);%将第三块axes当作剪切对象
+        A=handles.I;
+        [I1,rect]=imcrop(A);
+        %title('剪切前','color','r');
+        rectangle('Position',rect,'LineWidth',2,'EdgeColor','r')%显示图像剪切区域(会跳出一个窗体)
+        axes(handles.axes4)
+        imshow(I1);title('选取部分的图像');
+    else
+        warndlg('没有剪切的图像');
+    end
 catch
-    warndlg('您得输入一幅图像');
+    %warndlg('您得输入一幅图像');
 end

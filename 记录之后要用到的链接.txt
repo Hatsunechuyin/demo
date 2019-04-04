@@ -27,3 +27,5 @@ http://www.ilovematlab.cn/thread-260923-1-1.html数据间的传递
 
 c=handles.uipanel1;
 set(c,'Visible','off');隐藏控件
+
+http://www.ilovematlab.cn/thread-21797-2-1.html(句柄中变量的判断  例:不存在字段'I')
