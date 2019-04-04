@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 03-Apr-2019 17:33:01
+% Last Modified by GUIDE v2.5 04-Apr-2019 15:58:59
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -240,7 +240,10 @@ function Clear_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 %清除视图图片
-cla(handles.axes1,'reset');  %handles.axes2为显示图片窗口，reset即清除
+cla(handles.axes1,'reset');  %handles.axes1为显示图片窗口，reset即清除
+cla(handles.axes2,'reset');  %handles.axes2为显示图片窗口，reset即清除
+cla(handles.axes3,'reset');  %handles.axes3为显示图片窗口，reset即清除
+cla(handles.axes4,'reset');  %handles.axes4为显示图片窗口，reset即清除
 % 重置清空动态txt的文字
 %set(handles.axes1,'title','');  %handles.edit1为要清除文字的文本框（双击文本框可以看见tag）
 
@@ -269,6 +272,9 @@ else
 end
 %Update handles structure
 guidata(hObject,handles);
+
+
+
 
 % --- Executes on button press in pushbutton2.
 function pushbutton2_Callback(hObject, eventdata, handles)
@@ -329,16 +335,52 @@ end
 
 
 % --- Executes on button press in pushbutton3.
+%图像的平移操作
 function pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global y;
+global y;%获取全局的变量，也就是文本框里面的
 global x;
-I=handles.I;
-axes(handles.axes2);
+I=handles.I;%打开的图像的句柄
+axes(handles.axes2);%表示的是将上面的坐标轴做为当前坐标轴,在其上做图.
 se=translate(strel(1),[x y]);  
 j=imdilate(I,se); 
 axes(handles.axes2);
 imshow(j);title('竖直平移后图像');
 
+
+
+% --- Executes on mouse press over figure background.
+function figure1_ButtonDownFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on key press with focus on figure1 and none of its controls.
+function figure1_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.FIGURE)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton4.
+function pushbutton4_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+try
+    axes(handles.axes3);%将第三块axes当作剪切对象
+    A=handles.I;
+    [I1,rect]=imcrop(A);
+    title('剪切前','color','r');
+    rectangle('Position',rect,'LineWidth',2,'EdgeColor','r')%显示图像剪切区域(会跳出一个窗体)
+    axes(handles.axes4)
+    imshow(I1);title('选取部分的图像');
+catch
+    warndlg('您得输入一幅图像');
+end
