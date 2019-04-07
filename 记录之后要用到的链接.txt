@@ -29,3 +29,10 @@ c=handles.uipanel1;
 set(c,'Visible','off');隐藏控件
 
 http://www.ilovematlab.cn/thread-21797-2-1.html(句柄中变量的判断  例:不存在字段'I')
+
+
+
+//4.7
+val=get(handles.popmenu,'value'); %这是获取当前选项的位置，从上到下是1,2,3...
+str=get(handles.popmenu,'string');
+str(val) %这个将返回当前选项的内容，若是纯数字用str2num(str(val))

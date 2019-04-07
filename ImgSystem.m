@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 04-Apr-2019 17:07:19
+% Last Modified by GUIDE v2.5 07-Apr-2019 23:13:41
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -248,7 +248,8 @@ cla(handles.axes4,'reset');  %handles.axes4为显示图片窗口，reset即清除
 set(handles.text3,'String','');
 % 重置清空动态txt的文字
 %set(handles.axes1,'title','');  %handles.edit1为要清除文字的文本框（双击文本框可以看见tag）
-
+%清除完需要吧图片的内存也清理掉(注:这个功能待定,也许不需要清除)
+%set(handles.I,'String','');
 
 % --------------------------------------------------------------------
 function Close_Callback(hObject, eventdata, handles)
@@ -342,14 +343,22 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global y;%获取全局的变量，也就是文本框里面的
-global x;
-I=handles.I;%打开的图像的句柄
-axes(handles.axes2);%表示的是将上面的坐标轴做为当前坐标轴,在其上做图.
-se=translate(strel(1),[x y]);  
-j=imdilate(I,se); 
-axes(handles.axes2);
-imshow(j);title('竖直平移后图像');
+try
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        global y;%获取全局的变量，也就是文本框里面的
+        global x;
+        I=handles.I;%打开的图像的句柄
+        axes(handles.axes2);%表示的是将上面的坐标轴做为当前坐标轴,在其上做图.
+        se=translate(strel(1),[x y]);  
+        j=imdilate(I,se); 
+        axes(handles.axes2);
+        imshow(j);title('竖直平移后图像');
+    else
+        warndlg('没有剪切的图像');
+    end
+catch
+    %warndlg('您得输入一幅图像');
+end
 
 
 
@@ -391,4 +400,136 @@ try
     end
 catch
     %warndlg('您得输入一幅图像');
+end
+
+
+% --- Executes on selection change in popupmenu2.
+function popupmenu2_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global v_image;
+v_image=get(handles.popupmenu2,'value');
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu2
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pushbutton5.
+function pushbutton5_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+try
+    global v_image;%获取全局的变量，也就是文本框里面的
+    if isempty(v_image)
+        v_image=1;
+    end
+    disp(handles);%测试打印用的
+    whos;
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        %disp(v_image);%测试打印用的
+        switch v_image   %实现下拉列表需要写改语法
+            case 1 
+                I=handles.I;
+                J1=flipdim(I,2);%原图像的水平镜像
+                axes(handles.axes2);
+                imshow(J1);title('水平镜像');
+                %guidata(hObject,handles);%储存handles
+            case 2 
+                I=handles.I;
+                J2=flipdim(I,1);%原图像的垂直镜像
+                axes(handles.axes2);
+                imshow(J2);title('垂直镜像');
+                %guidata(hObject,handles);
+            case 3
+                I=handles.I;
+                J3=flipdim(I,1);%原图像的水平垂直镜像
+                J4=flipdim(J3,2);
+                axes(handles.axes2);
+                imshow(J4);title('水平垂直镜像');
+                %guidata(hObject,handles);
+        end
+    else
+        warndlg('没有剪切的图像');
+    end
+catch
+    %warndlg('您得输入一幅图像');
+end
+
+
+%创建这个窗体是吧需要的全局变量初始化
+% --- Executes during object creation, after setting all properties.
+function figure1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+%镜像的全局变量
+global v_image;
+v_image=1;
+%给水平位移变量赋初值
+global x;
+x=0;
+global y;
+y=0;
+%给旋转角度夫初值
+global rotate;
+rotate=0;
+
+
+%旋转图片，逆时针为正
+% --- Executes on button press in pushbutton6.
+function pushbutton6_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+try
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        I=handles.I;
+        global rotate;%获取全局的变量，也就是文本框里面的
+        r=imrotate(I,rotate,'nearest');%用邻插值法旋转图片
+        axes(handles.axes2);
+        imshow(r);title({['旋转的角度:', num2str(rotate),'°']});
+    else
+        warndlg('没有剪切的图像');
+    end
+catch
+    %warndlg('您得输入一幅图像');
+end
+
+
+function edit3_Callback(hObject, eventdata, handles)
+% hObject    handle to edit3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit3 as text
+%        str2double(get(hObject,'String')) returns contents of edit3 as a double
+global rotate;
+rotate=str2num(get(hObject,'String'));
+
+
+% --- Executes during object creation, after setting all properties.
+function edit3_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
 end
