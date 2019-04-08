@@ -36,3 +36,13 @@ http://www.ilovematlab.cn/thread-21797-2-1.html(句柄中变量的判断  例:不存在字段'
 val=get(handles.popmenu,'value'); %这是获取当前选项的位置，从上到下是1,2,3...
 str=get(handles.popmenu,'string');
 str(val) %这个将返回当前选项的内容，若是纯数字用str2num(str(val))
+
+1. 三行标题
+a= 1; b= 2; c = 3; d= 4;
+title( { 'Plot', ['a = ', num2str(a), 'b = ',num2str(b)], ['c = ', num2str(c),',d = ',...num2str(d) ] } )
+Notice：有两点，一是title中引入中括号[ ]，每对中括号表示一行；二是多行[ ]用{ }括起来
+2.两行标题
+a = 1; b = 2; c = 3; d =4;
+title( { 'Plot', ['a = ', num2str(a), ',b = ',num2str(b), ...',c = ', num2str(c),', d= ',num2str(d) ] } )
+xlabel,ylabel,text,legend等中此用法类似
+#end

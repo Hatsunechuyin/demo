@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 07-Apr-2019 23:13:41
+% Last Modified by GUIDE v2.5 08-Apr-2019 22:23:13
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -249,7 +249,8 @@ set(handles.text3,'String','');
 % 重置清空动态txt的文字
 %set(handles.axes1,'title','');  %handles.edit1为要清除文字的文本框（双击文本框可以看见tag）
 %清除完需要吧图片的内存也清理掉(注:这个功能待定,也许不需要清除)
-%set(handles.I,'String','');
+handles=rmfield(handles,'I');
+guidata(hObject,handles);
 
 % --------------------------------------------------------------------
 function Close_Callback(hObject, eventdata, handles)
@@ -533,3 +534,90 @@ function edit3_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes during object creation, after setting all properties.
+function axes1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes1
+
+
+% --- Executes on button press in pushbutton7.
+function pushbutton7_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+%try
+%需要哈夫曼编码的源代码
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        I=handles.I;      
+        Gray=rgb2gray(I);%转化成灰度的图像
+        axes(handles.axes2);
+        imshow(Gray);title('灰度图像');
+        [zipped,info]=huffencode(Gray);%调用哈夫曼编码程序进行压缩
+        unzipped=huffdecode(zipped,info);%调用哈夫曼解码程序进行解码
+        %L=info.avalen;disp(L);%平均码长
+        %CR=info.ratio;disp(CR);%压缩比
+       % H=info.h;disp(H);%信息熵
+       % CE=info.ce;disp(CE);%编码效率
+        axes(handles.axes3);
+        imshow(unzipped);
+    else
+        warndlg('请先打开需要操作的图片');
+    end
+%catch
+%end
+
+
+% --- Executes on button press in pushbutton8.
+function pushbutton8_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+try
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        I=handles.I;      
+        RGB=rgb2gray(I);
+        axes(handles.axes2);
+        imshow(RGB);title('灰度图像');
+        J=imnoise(RGB,'gaussian',0,0.025);%给灰度图像添加高斯白噪声，均值为0.方差为0.025
+        axes(handles.axes3);
+        imshow(J);title('带噪声的图像');
+        K=wiener2(J,[5 5]);
+        axes(handles.axes4);
+        imshow(K);title('维纳滤波降噪');
+    else
+        warndlg('请先打开需要操作的图片');
+    end
+catch
+end
+
+
+% --- Executes on button press in pushbutton9.
+function pushbutton9_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+%try
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        I=handles.I;      
+        RGB=rgb2gray(I);
+        RGB=im2double(RGB);
+        len=50;%设置参数
+        theta=20;
+        PSF=fspecial('motion',len,theta);%产生FSP
+        J=imfilter(RGB,PSF,'conv','circular');%运动模糊
+        axes(handles.axes2);
+        imshow(J);title('灰度退化图像图像');
+        nsr=0;
+        K=deconvwnr(J,PSF,nsr);%维纳滤波
+        axes(handles.axes3);
+        imshow(K);title('复原图像(维纳滤波)'); 
+    else
+        warndlg('请先打开需要操作的图片');
+    end
+%catch
+%end
