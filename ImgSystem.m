@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 08-Apr-2019 22:23:13
+% Last Modified by GUIDE v2.5 09-Apr-2019 09:22:26
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -621,3 +621,52 @@ function pushbutton9_Callback(hObject, eventdata, handles)
     end
 %catch
 %end
+
+
+% --- Executes on button press in pushbutton11.
+function pushbutton11_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+%维纳滤波复原图像
+I=handles.I;
+len=28;
+theta=14;
+PSF=fspecial('motion',len,theta);
+blurred=imfilter(I,PSF,'circular','conv');%读入无噪声模糊图像，并命名blurred
+len=28;
+theta=14;
+wnrl=deconvwnr(blurred,PSF,0.04);%维纳滤波复原图像
+axes(handles.axes2);
+imshow(blurred);title('由运动形成模糊图像');%显示模糊图像
+axes(handles.axes3);
+imshow(wnrl);title('维纳滤波复原图像');%显示复原图像
+
+
+% --- Executes on button press in pushbutton12.
+function pushbutton12_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton12 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+I=rgb2gray(I);
+BW5=edge(I,'canny');%进行canny算子边缘检测，门限值采用默认值
+axes(handles.axes2);    %显示在axes2框中
+imshow(BW5,[]);title('canny算子');
+
+
+
+% --- Executes on button press in pushbutton13.
+function pushbutton13_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton13 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+I=rgb2gray(I);%转化为灰度图像
+J=imnoise(I,'salt & pepper',0.04);%对图像增加椒盐噪声，强度为0.04
+axes(handles.axes2);    %显示在axex2框中
+imshow(J); title('受椒盐噪声污染图片');
+K=medfilt2(J);          %二维中值滤波
+axes(handles.axes3);
+imshow(K);title('二维中值滤波处理后的图片');
+
