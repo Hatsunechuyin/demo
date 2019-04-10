@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 09-Apr-2019 09:22:26
+% Last Modified by GUIDE v2.5 10-Apr-2019 23:32:33
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -354,6 +354,7 @@ try
         j=imdilate(I,se); 
         axes(handles.axes2);
         imshow(j);title('竖直平移后图像');
+        axis on;                  %显示坐标系
     else
         warndlg('没有剪切的图像');
     end
@@ -503,7 +504,10 @@ try
         global rotate;%获取全局的变量，也就是文本框里面的
         r=imrotate(I,rotate,'nearest');%用邻插值法旋转图片
         axes(handles.axes2);
+        %set(0,'defaultFigurePosition',[100,100,1000,500]);%设置窗口大小
+        %set(0,'defaultFigureColor',[1 1 1]);%设置窗口颜色
         imshow(r);title({['旋转的角度:', num2str(rotate),'°']});
+        axis on;                  %显示坐标系
     else
         warndlg('没有剪切的图像');
     end
@@ -630,13 +634,11 @@ function pushbutton11_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %维纳滤波复原图像
 I=handles.I;
-len=28;
-theta=14;
+len=28;%运动位移
+theta=14;%运动角度
 PSF=fspecial('motion',len,theta);
-blurred=imfilter(I,PSF,'circular','conv');%读入无噪声模糊图像，并命名blurred
-len=28;
-theta=14;
-wnrl=deconvwnr(blurred,PSF,0.04);%维纳滤波复原图像
+blurred=imfilter(I,PSF,'conv','circular');%读入无噪声模糊图像，并命名blurred
+wnrl=deconvwnr(blurred,PSF,0.0001);%维纳滤波复原图像
 axes(handles.axes2);
 imshow(blurred);title('由运动形成模糊图像');%显示模糊图像
 axes(handles.axes3);
@@ -670,3 +672,168 @@ K=medfilt2(J);          %二维中值滤波
 axes(handles.axes3);
 imshow(K);title('二维中值滤波处理后的图片');
 
+
+%傅里叶变换
+% --- Executes on button press in pushbutton14.
+function pushbutton14_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton14 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;%=======读取图像 显示图像
+ii=im2double(I); %=====将图像矩阵类型转换为double（图像计算很多是不能用整型的），没有这个会报错！！ ，如果不用这个就必须转化为灰度图！
+i1 = fft2(ii); %======傅里叶变换
+i2 =fftshift(i1); %======将变换的频率图像四角移动到中心（原来良的部分在四角 现在移动中心，便于后面的处理）
+i3=log(abs(i2)); %=====显示中心低频部分，加对数是为了更好的显示
+axes(handles.axes2);
+imshow(i3,[]);title('二维傅里叶变换');
+i5 = real(ifft2(ifftshift(i2))); %===频域的图反变换到空域 并取实部
+i6 = im2uint8(mat2gray(i5)); %===取其灰度图
+axes(handles.axes3);
+imshow(i6);title('逆变换');
+i7=rgb2gray(I);
+i8=fft2(i7);%===对灰色图才能归一化。因为那是2维矩阵，彩色图是3维矩阵，需要转化为2维灰图
+m=fftshift(i8); %直流分量移到频谱中心
+%RR=real(m); %取傅立叶变换的实部
+%II=imag(m); %取傅立叶变换的虚部
+A=abs(m);%计算频谱幅值
+%A=sqrt(RR.^2+II.^2);
+A=(A-min(min(A)))/(max(max(A))-min(min(A)))*225; %归一化
+axes(handles.axes4);
+imshow(A); %显示原图像
+colorbar; %显示图像的颜色条
+title('频谱图'); %图像命名
+
+%DCT变换
+% --- Executes on button press in pushbutton15.
+function pushbutton15_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton15 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+J=rgb2gray(I);%将图片转变为灰色图像
+axes(handles.axes2);
+imshow(J);title('原灰图像');
+K=dct2(J);%对图像做DCT变换
+axes(handles.axes3);
+imshow(log(abs(K))+1,[0,10]);title('DCT变换结果');
+colormap(gray(4));colorbar;
+K(abs(K)<0.1)=0;
+I=idct2(K)/255;
+axes(handles.axes4);
+imshow(I);title('压缩后的图片');
+
+% --- Executes on button press in pushbutton16.
+function pushbutton16_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton16 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton17.
+function pushbutton17_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton17 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+disp('原始图像I的大小:');
+whos('I')
+X=rgb2gray(I);
+I=im2double(X);
+[c,s]=wavedec2(I,2,'bior3.7');     %对图像用小波进行层分解
+cal=appcoef2(c,s,'bior3.7',1);     %提取小波分解结构中的一层的低频系数和高频系数
+ch1=detcoef2('h',c,s,1);          %提取二维水平方向细节系数
+cv1=detcoef2('v',c,s,1);          %提取二维垂直方向细节系数
+cd1=detcoef2('d',c,s,1);          %提取二维对角线方向细节系数
+ca1=appcoef2(c,s,'bior3.7',1);     %保留小波分解第一层低频信息
+ca1=wcodemat(ca1,440,'mat',0);   %首先对第一层信息进行量化编码
+%ca1=0.5*ca1;                  %改变图像高度
+axes(handles.axes2);
+imshow(I);                %显示压缩后的图象
+title('第一次压缩后的图像')
+disp('第一次压缩图像的大小为：')
+whos('ca1')
+ca2=appcoef2(c,s,'bior3.7',2);     %保留小波分解第二层低频信息进行压缩
+ca2=wcodemat(ca2,440,'mat',0);   %首先对第二层信息进行量化编码
+%ca2=0.25*ca2;                 %改变图像高度
+axes(handles.axes3);
+imshow(ca2);              %显示压缩后的图象
+title('第二次压缩后的图像')
+disp('第二次压缩图像的大小为：')
+whos('ca2')
+
+
+% --- Executes on button press in pushbutton18.
+function pushbutton18_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton18 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+I_gray=rgb2gray(I);%转换为灰度图
+%转换为双精度
+I_double=double(I_gray);
+[wid,len]=size(I_gray);%图像的大小
+%灰度级
+colorLevel=256;
+%直方图
+hist=zeros(colorLevel,1);
+%计算直方图
+for i=1:wid
+    for j=1:len
+        m=I_gray(i,j)+1;%图像的灰度级m
+        hist(m)=hist(m)+1;%灰度值为i的像素和
+    end
+end
+%直方图归一化
+hist=hist/(wid*len);%各灰度值概率 Pi
+miuT=0;%定义总体均值
+for m=1:colorLevel
+    miuT=miuT+(m-1)*hist(m);  %总体均值
+end
+xigmaB2=0;%
+for mindex=1:colorLevel
+    threshold=mindex-1;%设定阈值
+    omega1=0;%目标概率
+    omega2=0;%背景概率
+    for m=1:threshold-1
+        omega1=omega1+hist(m);% 目标概率 W0
+    end
+    omega2=1-omega1; %背景的概率 W1
+    miu1=0;%目标的平均灰度值
+    miu2=0;%背景的平均灰度值
+    for m=1:colorLevel
+        if m<threshold
+            miu1=miu1+(m-1)*hist(m);%目标 i*pi的累加值[1 threshold]
+        else
+            miu2=miu2+(m-1)*hist(m);%背景 i*pi的累加值[threshold m]
+        end
+    end
+    miu1=miu1/omega1;%目标的平均灰度值
+    miu2=miu2/omega2;%背景的平均灰度值
+    xigmaB21=omega1*(miu1-miuT)^2+omega2*(miu2-miuT)^2;%最大方差
+    xigma(mindex)=xigmaB21;%先设定一个值 再遍历所有灰度级
+    %找到xigmaB21的值最大
+    if xigmaB21>xigmaB2
+        finalT=threshold;%找到阈值 灰度级
+        xigmaB2=xigmaB21;%方差为最大
+    end
+end
+%阈值归一化
+fT=finalT/255;
+for i=1:wid
+     for j=1:len
+         if I_double(i,j)>finalT %大于所设定的均值 则为目标
+             bin(i,j)=0;
+         else
+             bin(i,j)=1;
+         end
+     end
+end
+axes(handles.axes2);
+imshow(bin);
+
+
+% --- Executes on button press in pushbutton19.
+function pushbutton19_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton19 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
