@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 10-Apr-2019 23:32:33
+% Last Modified by GUIDE v2.5 11-Apr-2019 23:30:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -490,6 +490,9 @@ y=0;
 %给旋转角度夫初值
 global rotate;
 rotate=0;
+%缩放的比例
+global res;
+res=1;
 
 
 %旋转图片，逆时针为正
@@ -837,3 +840,127 @@ function pushbutton19_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton19 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+
+function edit4_Callback(hObject, eventdata, handles)
+% hObject    handle to edit4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit4 as text
+%        str2double(get(hObject,'String')) returns contents of edit4 as a double
+global res;
+res=str2double(get(hObject,'String'));
+
+% --- Executes during object creation, after setting all properties.
+function edit4_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pushbutton20.
+function pushbutton20_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton20 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+try
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        global res;%获取全局的变量，缩放比例
+        I=handles.I;%打开的图像的句柄
+        axes(handles.axes2);%表示的是将上面的坐标轴做为当前坐标轴,在其上做图.      
+        im0 = imresize(I,res);%进行缩放到原来的res倍
+        imshow(im0);title({['缩放比例:', num2str(res)]}');
+        axis on;                  %显示坐标系
+    else
+        warndlg('没有剪切的图像');
+    end
+catch
+    %warndlg('您得输入一幅图像');
+end
+
+
+
+% --- Executes on slider movement.
+function slider1_Callback(hObject, eventdata, handles)
+% hObject    handle to slider1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+%set(handles.text3,'String',res);%在text3里显示数据
+try
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        global res1;
+        res1=get(handles.slider1,'value')%读取滑动条中的数据
+        I=handles.I;%打开的图像的句柄
+        disp(size(I));%测试 
+        im0 = imresize(I,res1);%进行缩放到原来的res倍
+        disp(size(im0));
+        axes(handles.axes2);%表示的是将上面的坐标轴做为当前坐标轴,在其上做图.
+        imshow(im0);title({['缩放比例:', num2str(res1)]}');
+        axis on;     %显示坐标系
+    else
+        warndlg('没有剪切的图像');
+    end
+catch
+    %warndlg('您得输入一幅图像');
+end
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+
+% --- Executes during object creation, after setting all properties.
+function slider1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes during object creation, after setting all properties.
+function axes2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to axes2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate axes2
+
+
+% --- Executes on button press in pushbutton22.
+function pushbutton22_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton22 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+fb=tofloat(I);  	%将图像转化为浮点型
+lapmask=[1 1 1;1 -8 1;1 1 1]; 	%拉普拉斯滤波模板
+fen=fb-imfilter(fb,lapmask,'replicate');
+axes(handles.axes2);
+imshow(fen);title('拉普拉斯锐化');
+%拉普拉斯算法
+function [out,revertclass] = tofloat(inputimage)
+%Copy the book of Gonzales
+identify = @(x) x;
+tosingle = @im2single;
+table = {'uint8',tosingle,@im2uint8 
+         'uint16',tosingle,@im2uint16 
+         'logical',tosingle,@logical
+         'double',identify,identify
+         'single',identify,identify};
+classIndex = find(strcmp(class(inputimage),table(:,1)));
+if isempty(classIndex)
+    error('不支持的图像类型');
+end
+out = table{classIndex,2}(inputimage);
+revertclass = table{classIndex,3};
