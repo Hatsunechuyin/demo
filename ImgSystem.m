@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 11-Apr-2019 23:30:24
+% Last Modified by GUIDE v2.5 13-Apr-2019 16:04:17
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -231,6 +231,13 @@ function Untitled_8_Callback(hObject, eventdata, handles)
 % hObject    handle to Untitled_8 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+set(handles.uipanel1,'Visible','off');
+set(handles.uipanel2,'Visible','off');
+set(handles.uipanel3,'Visible','off');
+set(handles.uipanel4,'Visible','off');
+set(handles.uipanel5,'Visible','off');
+set(handles.uipanel6,'Visible','off');
+set(handles.uipanel18,'Visible','on');
 
 
 % --------------------------------------------------------------------
@@ -683,6 +690,7 @@ function pushbutton14_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;%=======读取图像 显示图像
+I1=rgb2gray(I);
 ii=im2double(I); %=====将图像矩阵类型转换为double（图像计算很多是不能用整型的），没有这个会报错！！ ，如果不用这个就必须转化为灰度图！
 i1 = fft2(ii); %======傅里叶变换
 i2 =fftshift(i1); %======将变换的频率图像四角移动到中心（原来良的部分在四角 现在移动中心，便于后面的处理）
@@ -730,6 +738,35 @@ function pushbutton16_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton16 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+I=rgb2gray(I);
+sig=double(I)/255;
+[m_sig,n_sig]=size(sig);%图像大小
+sizi=16;                %给出图像分块和保留系数的个数
+Snum=108;
+%分块和进行变换
+T=hadamard(sizi);
+hdcoe=blkproc(sig,[sizi sizi],'P1*x*P2',T,T);
+%重新排列系数
+coe=im2col(hdcoe,[sizi sizi],'distinct');
+coe_temp=coe;
+[Y,Ind]=sort(coe);
+%舍去较小方差的系数
+[m,n]=size(coe);
+Snum=m-Snum;
+for i=1:n
+    coe_temp(Ind(1:Snum),i)=0;
+end
+%重建图像
+re_hdcoe=col2im(coe_temp,[sizi sizi],[m_sig n_sig],'distinct');
+re_sig=blkproc(re_hdcoe,[sizi sizi],'P1*x*P2',T,T);
+%figure,imshow(uint8(re_sig));
+error=sig.^2-re_sig.^2;
+MSE=sum(error(:)/numel(re_sig))
+axes(handles.axes2)
+imshow(sig);title('灰度图像');
+axes(handles.axes3)
+imshow(uint8(re_sig));title('压缩后的图像')
 
 
 % --- Executes on button press in pushbutton17.
@@ -964,3 +1001,46 @@ if isempty(classIndex)
 end
 out = table{classIndex,2}(inputimage);
 revertclass = table{classIndex,3};
+
+
+% --------------------------------------------------------------------
+function Untitled_9_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.uipanel1,'Visible','on');
+set(handles.uipanel2,'Visible','off');
+set(handles.uipanel3,'Visible','off');
+set(handles.uipanel4,'Visible','off');
+set(handles.uipanel5,'Visible','off');
+set(handles.uipanel6,'Visible','off');
+set(handles.uipanel18,'Visible','off');
+
+
+% --- Executes on button press in pushbutton23.
+function pushbutton23_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton23 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+I_2D=D3_To_D2(I);
+I1=fft2(I_2D);
+I2=uint8(real(ifft2(I1)));
+I1=log(1+abs(fftshift(I1)));;
+axes(handles.axes2);
+imshow(I1,[]);
+title('fft2后的频谱');
+axes(handles.axes3);
+imshow(I2,[]);
+title('ifft2后的复原图像');
+
+function image_out=D3_To_D2(image_in)
+[m,n]=size(image_in);
+ n=n/3;%由于我的灰度图像是185x194x3的，所以除了3，你们如果是PxQ的，就不要加了
+ A=zeros(m,n);%构造矩阵
+ for i=1:m
+     for j=1:n
+        A(i,j)= image_in(i,j);%填充图像到A
+     end
+ end
+image_out=uint8(A);
