@@ -46,3 +46,4 @@ a = 1; b = 2; c = 3; d =4;
 title( { 'Plot', ['a = ', num2str(a), ',b = ',num2str(b), ...',c = ', num2str(c),', d= ',num2str(d) ] } )
 xlabel,ylabel,text,legend等中此用法类似
 #end
+   
