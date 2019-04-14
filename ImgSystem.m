@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 13-Apr-2019 16:04:17
+% Last Modified by GUIDE v2.5 14-Apr-2019 23:03:27
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -193,6 +193,8 @@ set(handles.uipanel3,'Visible','off');
 set(handles.uipanel4,'Visible','on');
 set(handles.uipanel5,'Visible','off');
 set(handles.uipanel6,'Visible','off');
+set(handles.uipanel18,'Visible','off');
+
 
 % --------------------------------------------------------------------
 function Untitled_6_Callback(hObject, eventdata, handles)
@@ -595,6 +597,7 @@ try
     if  isfield(handles,'I')%判断句柄中的变量是否存在
         I=handles.I;      
         RGB=rgb2gray(I);
+        %RGB=I;
         axes(handles.axes2);
         imshow(RGB);title('灰度图像');
         J=imnoise(RGB,'gaussian',0,0.025);%给灰度图像添加高斯白噪声，均值为0.方差为0.025
@@ -676,10 +679,12 @@ function pushbutton13_Callback(hObject, eventdata, handles)
 I=handles.I;
 I=rgb2gray(I);%转化为灰度图像
 J=imnoise(I,'salt & pepper',0.04);%对图像增加椒盐噪声，强度为0.04
-axes(handles.axes2);    %显示在axex2框中
+axes(handles.axes3);    %显示在axex2框中
 imshow(J); title('受椒盐噪声污染图片');
-K=medfilt2(J);          %二维中值滤波
-axes(handles.axes3);
+K=medfilt2(J,[6,6]);          %二维中值滤波
+axes(handles.axes2);
+imshow(K);title('灰度图像');
+axes(handles.axes4);
 imshow(K);title('二维中值滤波处理后的图片');
 
 
@@ -1044,3 +1049,135 @@ function image_out=D3_To_D2(image_in)
      end
  end
 image_out=uint8(A);
+
+
+% --- Executes on selection change in listbox2.
+function listbox2_Callback(hObject, eventdata, handles)
+% hObject    handle to listbox2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns listbox2 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from listbox2
+
+
+% --- Executes during object creation, after setting all properties.
+function listbox2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to listbox2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in popupmenu3.
+function popupmenu3_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu3 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu3
+%try
+    whos;
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        I=handles.I;
+        %I=rgb2gray(I);%转换为灰度图
+        J=imnoise(I,'salt & pepper',0.02);
+        axes(handles.axes2);
+        imshow(J);title('添加椒盐噪声图像');
+        %disp(get(hObject,'value'));%测试打印用的
+        switch get(hObject,'value')   %实现下拉列表需要写改语法   %实现下拉列表需要写改语法
+            case 1    
+            case 2 
+                %K1=filter2(fspecial('average',3),J);%进行3*3模板平滑滤波
+                for i=1:3
+                    K1(:,:,i)=filter2(fspecial('average',3),J(:,:,i))/255;
+                end
+                axes(handles.axes3);
+                imshow(K1);title('3*3模板平滑滤波');
+                %guidata(hObject,handles);%储存handles
+            case 3 
+                for i=1:3
+                    K1(:,:,i)=filter2(fspecial('average',5),J(:,:,i))/255;
+                end
+                axes(handles.axes3);
+                imshow(K1);title('5*5模板平滑滤波');
+                %guidata(hObject,handles);
+            case 4
+                 for i=1:3
+                    K1(:,:,i)=filter2(fspecial('average',7),J(:,:,i))/255;
+                end
+                axes(handles.axes3);
+                imshow(K1);title('7*7模板平滑滤波');;
+                %guidata(hObject,handles);
+            case 5
+                 for i=1:3
+                    K1(:,:,i)=filter2(fspecial('average',9),J(:,:,i))/255;
+                end
+                axes(handles.axes3);
+                imshow(K1);title('9*9模板平滑滤波');;
+                %guidata(hObject,handles);
+        end
+    else
+        warndlg('没有剪切的图像');
+    end
+%catch
+    %warndlg('您得输入一幅图像');
+%end
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu3_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pushbutton24.
+function pushbutton24_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton24 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I1=handles.I;
+[M,N,G]=size(I1);
+result=zeros(M,N,3);
+%获得每一层每一个点的RGB值，并判断其值等于多少
+for g=1:3
+    A=zeros(1,256);
+    %每处理完一层，参数要重新初始化为0
+    average=0;
+    for k=1:256
+        count=0;
+        for i=1:M
+            for j=1:N
+                value=I1(i,j,g);
+                if value==k
+                    count=count+1;
+                end
+            end
+        end
+        count=count/(M*N*1.0);
+        average=average+count;
+        A(k)=average;
+    end
+    A=uint8(255.*A+0.5);
+    for i=1:M
+        for j=1:N
+            I1(i,j,g)=A(I1(i,j,g)+0.5);
+        end
+    end  
+end
+%展示处理效果
+axes(handles.axes3);
+imshow(I1);
+axes(handles.axes2);
+imhist(I1)
