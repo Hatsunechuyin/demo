@@ -1,5 +1,6 @@
 //https://jingyan.baidu.com/article/359911f5a9e0bc57fe030617.html(matlab GUI怎么设计点击菜单项切换GUI界面？)
 
+整体的毕设流程：https://github.com/Hatsunechuyin/demo.git
 
 为方便叙述设第一个GUI文件名为GUI_1，第二个GUI文件名为GUI_2
 具体方法：
