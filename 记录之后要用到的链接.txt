@@ -94,13 +94,14 @@ xlabel,ylabel,text,legend等中此用法类似
 
 图像增强：https://blog.csdn.net/su_yuheng/article/details/78544648
 	      https://blog.csdn.net/qq_34206952/article/details/82833586
+		  https://blog.csdn.net/weixin_39569242/article/details/81156341
 
 //19.4.15
-图像锐化：https://blog.csdn.net/u010703122/article/details/49308361
-			梯度算子(微分法)
-			其他锐化算子
-			拉普拉斯算子
-锐化图像 = 原图像 + 加重的边缘
+		图像锐化：https://blog.csdn.net/u010703122/article/details/49308361
+					梯度算子(微分法)
+					其他锐化算子
+					拉普拉斯算子
+		锐化图像 = 原图像 + 加重的边缘
 
 具体参考：http://www.cnblogs.com/kkyyhh96/p/6505473.html
 2	图像变换	7
@@ -118,6 +119,7 @@ xlabel,ylabel,text,legend等中此用法类似
 	3.5	频率域图像增强	28
 	
 图像复原：https://blog.csdn.net/fly_egg/article/details/60764374
+		  https://blog.csdn.net/weixin_39569242/article/details/81156482
 三、图像复原经典方法
 	1逆滤波复原法（一般不考虑噪声） 
 	2维纳滤波 
@@ -127,3 +129,7 @@ xlabel,ylabel,text,legend等中此用法类似
 
 图像RGB分离成三个通道：https://blog.csdn.net/qq_33297776/article/details/52253734
 三通道合成彩色图片：https://zhidao.baidu.com/question/438765266.html
+
+图像变换：https://blog.csdn.net/weixin_39569242/article/details/80070196
+
+高通跟低通滤波进行图片增强：https://blog.csdn.net/weixin_39569242/article/details/81156413（可以用switch语句来进行）
