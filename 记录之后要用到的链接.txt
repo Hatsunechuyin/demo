@@ -95,6 +95,7 @@ xlabel,ylabel,text,legend等中此用法类似
 图像增强：https://blog.csdn.net/su_yuheng/article/details/78544648
 	      https://blog.csdn.net/qq_34206952/article/details/82833586
 		  https://blog.csdn.net/weixin_39569242/article/details/81156341
+		  https://www.cnblogs.com/kkyyhh96/p/6505584.html
 
 //19.4.15
 		图像锐化：https://blog.csdn.net/u010703122/article/details/49308361
@@ -136,3 +137,13 @@ xlabel,ylabel,text,legend等中此用法类似
 
 基础知识：https://wenku.baidu.com/view/0113863283c4bb4cf7ecd1ba.html
 		  https://wenku.baidu.com/view/4d5375be18e8b8f67c1cfad6195f312b3069eb7a.html
+		  
+		  
+MATLAB - 为什么imshow(g,[])可以正常显示，而imshow(g)却显示空白图像？
+Q：为什么imshow(g,[])可以正常显示，而imshow(g)却显示空白图像？
+A：数据类型如果是double，imshow的处理范围是0-1
+数据类型如果是uint8，imshow的处理范围是0-255
+如果数据是0-255的，类型又是double，直接imshow会把大于1的都当成1，就是一片白了
+解决方法
+1 imshow(uint8(img));
+2 imshow(img, []);

@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 14-Apr-2019 23:03:27
+% Last Modified by GUIDE v2.5 15-Apr-2019 23:06:03
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -730,12 +730,12 @@ J=rgb2gray(I);%将图片转变为灰色图像
 axes(handles.axes2);
 imshow(J);title('原灰图像');
 K=dct2(J);%对图像做DCT变换
-axes(handles.axes3);
+axes(handles.axes4);
 imshow(log(abs(K))+1,[0,10]);title('DCT变换结果');
 colormap(gray(4));colorbar;
 K(abs(K)<0.1)=0;
 I=idct2(K)/255;
-axes(handles.axes4);
+axes(handles.axes3);
 imshow(I);title('压缩后的图片');
 
 % --- Executes on button press in pushbutton16.
@@ -780,28 +780,39 @@ function pushbutton17_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
-disp('原始图像I的大小:');
-whos('I')
 X=rgb2gray(I);
 I=im2double(X);
+axes(handles.axes2);
+imshow(I);title('灰度图像');
+disp('原始图像I的大小:');
+whos('I')
+%对图像用bior3.7小波进行2层小波分解
 [c,s]=wavedec2(I,2,'bior3.7');     %对图像用小波进行层分解
 cal=appcoef2(c,s,'bior3.7',1);     %提取小波分解结构中的一层的低频系数和高频系数
 ch1=detcoef2('h',c,s,1);          %提取二维水平方向细节系数
 cv1=detcoef2('v',c,s,1);          %提取二维垂直方向细节系数
 cd1=detcoef2('d',c,s,1);          %提取二维对角线方向细节系数
+%分别对个频率成分进行重构
+a1=wrcoef2('a',c,s,'bior3.7',1);
+h1=wrcoef2('h',c,s,'bior3.7',1);
+v1=wrcoef2('v',c,s,'bior3.7',1);
+d1=wrcoef2('d',c,s,'bior3.7',1);
+c1=[a1,h1;v1,d1];
+%axes(handles.axes2);
+%imshow(c1);title('分解后低频跟高频的信息');
 ca1=appcoef2(c,s,'bior3.7',1);     %保留小波分解第一层低频信息
 ca1=wcodemat(ca1,440,'mat',0);   %首先对第一层信息进行量化编码
-%ca1=0.5*ca1;                  %改变图像高度
-axes(handles.axes2);
-imshow(I);                %显示压缩后的图象
+ca1=0.5*ca1;                  %改变图像高度
+axes(handles.axes3);
+imshow(uint8(ca1));                %显示压缩后的图象
 title('第一次压缩后的图像')
 disp('第一次压缩图像的大小为：')
 whos('ca1')
 ca2=appcoef2(c,s,'bior3.7',2);     %保留小波分解第二层低频信息进行压缩
 ca2=wcodemat(ca2,440,'mat',0);   %首先对第二层信息进行量化编码
-%ca2=0.25*ca2;                 %改变图像高度
-axes(handles.axes3);
-imshow(ca2);              %显示压缩后的图象
+ca2=0.25*ca2;                 %改变图像高度
+axes(handles.axes4);
+imshow(uint8(ca2));       %显示压缩后的图象 （也可以imshow(ca2,[]))不然超出范围一片空白
 title('第二次压缩后的图像')
 disp('第二次压缩图像的大小为：')
 whos('ca2')
@@ -814,15 +825,11 @@ function pushbutton18_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
 I_gray=rgb2gray(I);%转换为灰度图
-%转换为双精度
-I_double=double(I_gray);
+I_double=double(I_gray);%转换为双精度
 [wid,len]=size(I_gray);%图像的大小
-%灰度级
-colorLevel=256;
-%直方图
-hist=zeros(colorLevel,1);
-%计算直方图
-for i=1:wid
+colorLevel=256;%灰度级
+hist=zeros(colorLevel,1);%直方图
+for i=1:wid%计算直方图
     for j=1:len
         m=I_gray(i,j)+1;%图像的灰度级m
         hist(m)=hist(m)+1;%灰度值为i的像素和
@@ -1031,14 +1038,16 @@ I=handles.I;
 I_2D=D3_To_D2(I);
 I1=fft2(I_2D);
 I2=uint8(real(ifft2(I1)));
-I1=log(1+abs(fftshift(I1)));;
+I1=log(1+abs(fftshift(I1)));
 axes(handles.axes2);
+imshow(I_2D);title('灰度图像');
+axes(handles.axes4);
 imshow(I1,[]);
-title('fft2后的频谱');
+title('fft2后的频谱');colorbar;
 axes(handles.axes3);
 imshow(I2,[]);
 title('ifft2后的复原图像');
-
+%三位转换成二维
 function image_out=D3_To_D2(image_in)
 [m,n]=size(image_in);
  n=n/3;%由于我的灰度图像是185x194x3的，所以除了3，你们如果是PxQ的，就不要加了
@@ -1147,37 +1156,118 @@ function pushbutton24_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton24 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-I1=handles.I;
-[M,N,G]=size(I1);
-result=zeros(M,N,3);
-%获得每一层每一个点的RGB值，并判断其值等于多少
-for g=1:3
-    A=zeros(1,256);
-    %每处理完一层，参数要重新初始化为0
-    average=0;
-    for k=1:256
-        count=0;
-        for i=1:M
-            for j=1:N
-                value=I1(i,j,g);
-                if value==k
-                    count=count+1;
-                end
-            end
-        end
-        count=count/(M*N*1.0);
-        average=average+count;
-        A(k)=average;
-    end
-    A=uint8(255.*A+0.5);
-    for i=1:M
-        for j=1:N
-            I1(i,j,g)=A(I1(i,j,g)+0.5);
-        end
-    end  
-end
-%展示处理效果
-axes(handles.axes3);
-imshow(I1);
+I=handles.I;
+I1=rgb2gray(I);
 axes(handles.axes2);
-imhist(I1)
+imhist(I1);
+I2=histeq(I1);
+axes(handles.axes3);
+imshow(I2);
+axes(handles.axes4);
+imhist(I2);
+
+%I1=handles.I;
+%[M,N,G]=size(I1);
+%result=zeros(M,N,3);
+%获得每一层每一个点的RGB值，并判断其值等于多少
+%for g=1:3
+  %  A=zeros(1,256);
+    %每处理完一层，参数要重新初始化为0
+   % average=0;
+    %for k=1:256
+       % count=0;
+      %  for i=1:M
+         %   for j=1:N
+          %      value=I1(i,j,g);
+           %     if value==k
+           %         count=count+1;
+             %   end
+          %  end
+       % end
+       % count=count/(M*N*1.0);
+      %  average=average+count;
+      %  A(k)=average;
+  %  end
+ %   A=uint8(255.*A+0.5);
+  %  for i=1:M
+    %    for j=1:N
+     %       I1(i,j,g)=A(I1(i,j,g)+0.5);
+     %   end
+  %  end  
+%end
+%展示处理效果
+%axes(handles.axes3);
+%imshow(I1);
+%axes(handles.axes2);
+%imhist(I1)
+
+
+% --------------------------------------------------------------------
+function Untitled_11_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function save_1_Callback(hObject, eventdata, handles)
+% hObject    handle to save_1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+try
+    [f,p]=uiputfile({'*.jpg'},'保存文件');
+    str=strcat(p,f);
+    pix=getframe(handles.axes2);
+    imwrite(pix.cdata,str,'jpg')
+catch
+end
+
+
+% --------------------------------------------------------------------
+function save_2_Callback(hObject, eventdata, handles)
+% hObject    handle to save_2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+try
+    [f,p]=uiputfile({'*.jpg'},'保存文件');
+    str=strcat(p,f);
+    pix=getframe(handles.axes3);
+    imwrite(pix.cdata,str,'jpg')
+catch
+end
+
+% --------------------------------------------------------------------
+function save_4_Callback(hObject, eventdata, handles)
+% hObject    handle to save_4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+try
+    [f,p]=uiputfile({'*.jpg'},'保存文件');
+    str=strcat(p,f);
+    pix=getframe(handles.axes4);
+    imwrite(pix.cdata,str,'jpg');
+catch
+end
+
+
+% --------------------------------------------------------------------
+function savea_Callback(hObject, eventdata, handles)
+% hObject    handle to savea (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton25.
+function pushbutton25_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton25 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+I1=rgb2gray(I);
+axes(handles.axes2);
+imhist(I1);
+I2=imadjust(I1,[0.3 0.7],[0.1 0.9],1);
+axes(handles.axes3);
+imshow(I2);
+axes(handles.axes4);
+imhist(I2);
