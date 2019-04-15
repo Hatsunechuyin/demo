@@ -133,3 +133,6 @@ xlabel,ylabel,text,legend等中此用法类似
 图像变换：https://blog.csdn.net/weixin_39569242/article/details/80070196
 
 高通跟低通滤波进行图片增强：https://blog.csdn.net/weixin_39569242/article/details/81156413（可以用switch语句来进行）
+
+基础知识：https://wenku.baidu.com/view/0113863283c4bb4cf7ecd1ba.html
+		  https://wenku.baidu.com/view/4d5375be18e8b8f67c1cfad6195f312b3069eb7a.html
