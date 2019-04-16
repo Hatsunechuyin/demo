@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 15-Apr-2019 23:06:03
+% Last Modified by GUIDE v2.5 16-Apr-2019 10:58:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -985,19 +985,23 @@ function axes2_CreateFcn(hObject, eventdata, handles)
 
 % Hint: place code in OpeningFcn to populate axes2
 
-
+%图像锐化的实质：锐化图像 = 原图像 + 加重的边缘
 % --- Executes on button press in pushbutton22.
 function pushbutton22_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton22 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
+%I=rgb2gray(I);
 fb=tofloat(I);  	%将图像转化为浮点型
-lapmask=[1 1 1;1 -8 1;1 1 1]; 	%拉普拉斯滤波模板
-fen=fb-imfilter(fb,lapmask,'replicate');
+%lapmask=[1 1 1;1 -8 1;1 1 1]; 	%拉普拉斯滤波模板
+lapmask=[0,1,0;1,-4,1;0,1,0];
+fen=imfilter(fb,lapmask,'replicate');%对任意类型数组或多维图像进行滤波
+fen1=fb-fen;
 axes(handles.axes2);
-imshow(fen);title('拉普拉斯锐化');
-%拉普拉斯算法
+imshow(fen);title('图像的边缘');
+axes(handles.axes3);
+imshow(fen1);title('拉普拉斯锐化');
 function [out,revertclass] = tofloat(inputimage)
 %Copy the book of Gonzales
 identify = @(x) x;
@@ -1117,7 +1121,7 @@ function popupmenu3_Callback(hObject, eventdata, handles)
                 imshow(K1);title('5*5模板平滑滤波');
                 %guidata(hObject,handles);
             case 4
-                 for i=1:3
+                for i=1:3
                     K1(:,:,i)=filter2(fspecial('average',7),J(:,:,i))/255;
                 end
                 axes(handles.axes3);
@@ -1271,3 +1275,123 @@ axes(handles.axes3);
 imshow(I2);
 axes(handles.axes4);
 imhist(I2);
+
+
+% --- Executes on button press in pushbutton26.
+function pushbutton26_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton26 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+Laplace=[0 1 0;1 -4 1;0 1 0];
+
+
+
+% --- Executes on selection change in popupmenu4.
+function popupmenu4_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global fil;
+fil=get(hObject,'value');
+disp(fil);
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu4 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu4
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu4_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in popupmenu5.
+function popupmenu5_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global filter;
+filter=get(handles.popupmenu5,'value');
+global bRadius;%截止半径
+switch filter
+    case 1
+        set(handles.popupmenu6,'string',[20,50,300]);
+        bRadius=20;
+    case 2
+        set(handles.popupmenu6,'string',[2,4,8]);
+        bRadius=2;
+end
+disp(filter);
+disp(bRadius);
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu5 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu5
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu5_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in popupmenu6.
+function popupmenu6_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global bRadius;
+bRadius=get
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu6 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu6
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu6_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu6 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on key press with focus on popupmenu6 and none of its controls.
+function popupmenu6_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu6 (see GCBO)
+% eventdata  structure with the following fields (see MATLAB.UI.CONTROL.UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+set(handles.popupmenu6,'string','1');
+
+
+% --- Executes on button press in pushbutton27.
+function pushbutton27_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton27 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global bRadius;
+disp(bRadius);
+
+
+% --- Executes during object creation, after setting all properties.
+function uipanel1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to uipanel1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called

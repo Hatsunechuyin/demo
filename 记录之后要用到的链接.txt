@@ -134,6 +134,16 @@ xlabel,ylabel,text,legend等中此用法类似
 图像变换：https://blog.csdn.net/weixin_39569242/article/details/80070196
 
 高通跟低通滤波进行图片增强：https://blog.csdn.net/weixin_39569242/article/details/81156413（可以用switch语句来进行）
+选择一灰度图像，进行低通滤波，观察滤波效果
+选择一灰度图像，进行高通滤波，观察滤波效果
+										d1=2;
+巴特沃斯			高通滤波			d2=4;%截止半径
+										d3=8;
+			---->				----->
+										d1=20;
+高斯				低通滤波			d2=50;
+										d3=300;
+										
 
 基础知识：https://wenku.baidu.com/view/0113863283c4bb4cf7ecd1ba.html
 		  https://wenku.baidu.com/view/4d5375be18e8b8f67c1cfad6195f312b3069eb7a.html
@@ -147,3 +157,6 @@ A：数据类型如果是double，imshow的处理范围是0-1
 解决方法
 1 imshow(uint8(img));
 2 imshow(img, []);
+
+//--------------------------4.16------------------------------------
+锐化：https://www.cnblogs.com/fydeblog/p/6748411.html
