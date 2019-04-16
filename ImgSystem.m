@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 16-Apr-2019 10:58:19
+% Last Modified by GUIDE v2.5 16-Apr-2019 16:00:07
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -502,6 +502,13 @@ rotate=0;
 %缩放的比例
 global res;
 res=1;
+global bRadius;%截止半径
+bRadius=20;
+global fil;%高斯跟巴特沃斯的选择
+fil=1;
+global filter;%高通滤波跟低通滤波
+filter=1;
+
 
 
 %旋转图片，逆时针为正
@@ -1293,7 +1300,6 @@ function popupmenu4_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global fil;
 fil=get(hObject,'value');
-disp(fil);
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu4 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu4
 
@@ -1318,17 +1324,12 @@ function popupmenu5_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global filter;
 filter=get(handles.popupmenu5,'value');
-global bRadius;%截止半径
 switch filter
     case 1
-        set(handles.popupmenu6,'string',[20,50,300]);
-        bRadius=20;
+        set(handles.popupmenu6,'string',{20,50,300});
     case 2
-        set(handles.popupmenu6,'string',[2,4,8]);
-        bRadius=2;
+        set(handles.popupmenu6,'string',{2,4,8});
 end
-disp(filter);
-disp(bRadius);
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu5 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu5
 
@@ -1352,7 +1353,9 @@ function popupmenu6_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global bRadius;
-bRadius=get
+val=get(handles.popupmenu6,'value');
+str=get(handles.popupmenu6,'string');
+bRadius=str2double(str(val));
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu6 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu6
 
@@ -1386,12 +1389,39 @@ function pushbutton27_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton27 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global fil;
+%disp(fil);
+global filter;
+%disp(filter);
 global bRadius;
-disp(bRadius);
+%disp(bRadius);
+switch fil
+    case 1
+        switch filter
+            case 1
+                disp('高斯低通');
+            case 2
+                disp('高斯高通');
+        end 
+    case 2
+        switch filter
+            case 1
+                disp('巴特沃斯低通');
+            case 2
+                disp('巴特沃斯高通');
+        end 
+end
 
 
 % --- Executes during object creation, after setting all properties.
 function uipanel1_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to uipanel1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes during object creation, after setting all properties.
+function uipanel22_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to uipanel22 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
