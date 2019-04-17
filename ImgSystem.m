@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 16-Apr-2019 16:00:07
+% Last Modified by GUIDE v2.5 17-Apr-2019 22:46:46
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -207,6 +207,7 @@ set(handles.uipanel3,'Visible','off');
 set(handles.uipanel4,'Visible','off');
 set(handles.uipanel5,'Visible','on');
 set(handles.uipanel6,'Visible','off');
+set(handles.uipanel18,'Visible','off');
 
 % --------------------------------------------------------------------
 function Untitled_7_Callback(hObject, eventdata, handles)
@@ -1323,12 +1324,22 @@ function popupmenu5_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global filter;
+global bRadius;
 filter=get(handles.popupmenu5,'value');
 switch filter
     case 1
         set(handles.popupmenu6,'string',{20,50,300});
+        str=get(handles.popupmenu6,'string');
+        val=get(handles.popupmenu6,'value');
+        %disp(str(val));
+        bRadius=str2double(str(val));
+        disp(bRadius);
     case 2
         set(handles.popupmenu6,'string',{2,4,8});
+        str=get(handles.popupmenu6,'string');
+        val=get(handles.popupmenu6,'value');
+        bRadius=str2double(str(val));
+        disp(bRadius);
 end
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu5 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu5
@@ -1389,29 +1400,81 @@ function pushbutton27_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton27 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+%巴特沃斯低通滤波器的传递函数为：h=1/(1+0.414*(d/d0)^(2*level));
+%高斯低通滤波器的传递函数为 ：h=exp(-1/2*(d^2/d0^2));
+%巴特沃斯高通滤波器的传递函数为：h=1/(1+0.414*(d0/d)^(2*level));
+%高斯高通滤波器的传递函数为 ：h=1-exp(-1/2*(d^2/d0^2));
 global fil;
 %disp(fil);
 global filter;
 %disp(filter);
 global bRadius;
-%disp(bRadius);
+disp(bRadius);
+I=handles.I;
+I1=rgb2gray(I);
+I2=imnoise(I1,'gaussian',0.03);	 %加均值为0，方差为0.03的高斯噪声
+%I3=double(I2);
+fft_I=fft2(I2); 	% 二维离散傅立叶变换
+shift_I=fftshift(fft_I); 	% 直流分量移到频谱中心
+[M,N]=size(shift_I);
+m=floor(M/2);
+n=floor(N/2);
+title1='';
+level=4;%2级巴特沃斯滤波器 2时接近高斯，5时接近理想，但是数值更大时会有模糊效应
 switch fil
     case 1
         switch filter
             case 1
+                title1='高斯低通';
                 disp('高斯低通');
+                for i=1:M
+                    for j=1:N
+                        d=sqrt((i-m)^2+(j-n)^2);
+                        h=exp(-1/2*(d^2/bRadius^2));
+                        result(i,j)=h*shift_I(i,j);
+                    end
+                end
+                result1=uint8(real(ifft2(ifftshift(result))));
             case 2
+                title1='高斯高通';
                 disp('高斯高通');
+                for i=1:M
+                     for j=1:N
+                           d=sqrt((i-m)^2+(j-n)^2);
+                           h=1-exp(-1/2*(d^2/bRadius^2));
+                           result(i,j)=h*shift_I(i,j);
+                     end
+                end
+                result1=uint8(real(ifft2(ifftshift(result))));
         end 
     case 2
         switch filter
             case 1
+                title1='巴特沃斯低通';
                 disp('巴特沃斯低通');
+                for i=1:M
+                    for j=1:N
+                        d=sqrt((i-m)^2+(j-n)^2);
+                        h=1/(1+0.414*(d/bRadius)^(2*level));
+                        result(i,j)=h*shift_I(i,j);
+                    end
+                end
+                result1=uint8(real(ifft2(ifftshift(result))));
             case 2
+                title1='巴特沃斯高通';
                 disp('巴特沃斯高通');
+                for i=1:M
+                     for j=1:N
+                         d=sqrt((i-m)^2+(j-n)^2);
+                         h=1/(1+0.414*(d/bRadius)^(2*level));
+                         result(i,j)=h*shift_I(i,j);
+                     end
+                end
+                result1=uint8(real(ifft2(ifftshift(result))));
         end 
 end
-
+axes(handles.axes2);
+imshow(result1);title(title1);
 
 % --- Executes during object creation, after setting all properties.
 function uipanel1_CreateFcn(hObject, eventdata, handles)
@@ -1425,3 +1488,35 @@ function uipanel22_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to uipanel22 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on button press in pushbutton35.
+function pushbutton35_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton35 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+[file path]=uigetfile('*.bmp;*.jpg;*.png','请选择一幅图像');
+if file==0 warndlg('您得输入一幅已失真图像');
+%警告对话框提示输入合法图像文件
+else
+    I1=imread(fullfile(path,file));
+    axes(handles.axes2);
+    imshow(I1);title('失真图像');
+end
+len=1.5;%运动位移
+theta=1.5;%运动角度
+PSF=fspecial('motion',len,theta);
+%blurred=imfilter(I,PSF,'conv','circular');%读入无噪声模糊图像，并命名blurred
+blurred=I1;
+wnrl=deconvwnr(blurred,PSF,0.0001);%维纳滤波复原图像
+  %axes(handles.axes3);
+%imshow(blurred);title('由运动形成模糊图像');%显示模糊图像
+axes(handles.axes3);
+imshow(wnrl);title('维纳滤波复原图像');%显示复原图像
+
+
+% --- Executes on button press in pushbutton36.
+function pushbutton36_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton36 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

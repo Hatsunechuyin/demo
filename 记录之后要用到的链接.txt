@@ -122,6 +122,7 @@ xlabel,ylabel,text,legend等中此用法类似
 	
 图像复原：https://blog.csdn.net/fly_egg/article/details/60764374
 		  https://blog.csdn.net/weixin_39569242/article/details/81156482
+		  https://blog.csdn.net/u014722627/article/details/79817074
 三、图像复原经典方法
 	1逆滤波复原法（一般不考虑噪声） 
 	2维纳滤波 
@@ -161,3 +162,4 @@ A：数据类型如果是double，imshow的处理范围是0-1
 
 //--------------------------4.16------------------------------------
 锐化：https://www.cnblogs.com/fydeblog/p/6748411.html
+
