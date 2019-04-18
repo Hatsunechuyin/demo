@@ -18,6 +18,7 @@
 			2.3	离散余弦变换	
 		2.2.2小波变换
 			2.1压缩
+			https://blog.csdn.net/ebowtang/article/details/50477720
 3.编码
 	3.1.
 4.增强
@@ -34,6 +35,8 @@
 	2维纳滤波 
 	3约束最小二乘法
 6.分割
+https://blog.csdn.net/KYJL888/article/details/78253734	
+https://blog.csdn.net/qq_28942201/article/details/79376188
 
 
 为方便叙述设第一个GUI文件名为GUI_1，第二个GUI文件名为GUI_2
@@ -110,7 +113,8 @@ xlabel,ylabel,text,legend等中此用法类似
 具体参考：http://www.cnblogs.com/kkyyhh96/p/6505473.html
 2	图像变换	7
 	2.1	傅立叶变换	7
-	2.2	哈达玛变换	12
+	2.2	哈达玛变换	12https://blog.csdn.net/qq_31811537/article/details/80516410
+					  https://blog.csdn.net/samkieth/article/details/50389845
 	2.3	离散余弦变换	13
 3	图像增强	14
 	3.2	灰度变换	16

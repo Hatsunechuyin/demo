@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 18-Apr-2019 14:23:26
+% Last Modified by GUIDE v2.5 18-Apr-2019 16:05:49
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -751,36 +751,59 @@ function pushbutton16_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton16 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-I=handles.I;
-I=rgb2gray(I);
-sig=double(I)/255;
-[m_sig,n_sig]=size(sig);%图像大小
-sizi=16;                %给出图像分块和保留系数的个数
-Snum=108;
-%分块和进行变换
-T=hadamard(sizi);
-hdcoe=blkproc(sig,[sizi sizi],'P1*x*P2',T,T);
-%重新排列系数
-coe=im2col(hdcoe,[sizi sizi],'distinct');
-coe_temp=coe;
-[Y,Ind]=sort(coe);
-%舍去较小方差的系数
-[m,n]=size(coe);
-Snum=m-Snum;
-for i=1:n
-    coe_temp(Ind(1:Snum),i)=0;
-end
-%重建图像
-re_hdcoe=col2im(coe_temp,[sizi sizi],[m_sig n_sig],'distinct');
-re_sig=blkproc(re_hdcoe,[sizi sizi],'P1*x*P2',T,T);
-%figure,imshow(uint8(re_sig));
-error=sig.^2-re_sig.^2;
-MSE=sum(error(:)/numel(re_sig))
-axes(handles.axes2)
-imshow(sig);title('灰度图像');
-axes(handles.axes3)
-imshow(uint8(re_sig));title('压缩后的图像')
-
+% I=handles.I;
+% I=rgb2gray(I);
+% sig=double(I)/255;
+% [m_sig,n_sig]=size(sig);%图像大小
+% sizi=16;                %给出图像分块和保留系数的个数
+% Snum=108;
+% %分块和进行变换
+% T=hadamard(sizi);
+% hdcoe=blkproc(sig,[sizi sizi],'P1*x*P2',T,T);
+% %重新排列系数
+% coe=im2col(hdcoe,[sizi sizi],'distinct');
+% coe_temp=coe;
+% [Y,Ind]=sort(coe);
+% %舍去较小方差的系数
+% [m,n]=size(coe);
+% Snum=m-Snum;
+% for i=1:n
+%     coe_temp(Ind(1:Snum),i)=0;
+% end
+% %重建图像
+% re_hdcoe=col2im(coe_temp,[sizi sizi],[m_sig n_sig],'distinct');
+% re_sig=blkproc(re_hdcoe,[sizi sizi],'P1*x*P2',T,T);
+% %figure,imshow(uint8(re_sig));
+% error=sig.^2-re_sig.^2;
+% MSE=sum(error(:)/numel(re_sig))
+% axes(handles.axes2)
+% imshow(sig);title('灰度图像');
+% axes(handles.axes3)
+% imshow(uint8(re_sig));title('压缩后的图像')
+im_l=handles.I;
+im_l1=im2double(im_l);
+im_l2=rgb2gray(im_l1);
+%对图像进行哈达玛变换
+H=hadamard(512);%产生512X512的Hadamard矩阵
+haImg=H*im_l2*H;
+haImg2=haImg/512;
+%对图像进行哈达玛逆变换
+hhaImg=H'*haImg2*H';
+hhaImg2=hhaImg/512;
+haImg1=im2uint8(haImg);
+hhaImg1=im2uint8(hhaImg2);
+subplot(2,2,1);
+imshow(im_l);
+title('原图');
+subplot(2,2,2);
+imshow(im_l2);
+title('灰度图');
+subplot(2,2,3);
+imshow(haImg2);
+title('图像的二维离散Hadamard变换');
+subplot(2,2,4);
+imshow(hhaImg1);
+title('图像的二维离散Hadamard逆变换');
 
 % --- Executes on button press in pushbutton17.
 function pushbutton17_Callback(hObject, eventdata, handles)
@@ -1570,7 +1593,25 @@ function pushbutton36_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton36 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+X=handles.I;
+[c,s]=wavedec2(X,3,'sym4');  %进行二层小波分解
+len=length(c);
+justdet = prod(s(1,:));%截取细节系数起始位置（不处理近似系数）  
+%处理低频分解系数，突出轮廓
+for I =1:justdet
+    if(c( I )>250)
+      c( I )=1.5*c( I );
+    end
+end
+%处理高频分解系数，弱化细节
+for I =justdet:len
+    if(c( I ) < 150)
+      c( I )=0.75*c( I );
+    end
+end
+nx=waverec2(c,s,'sym4');%分解系数重构
+axes(handles.axes2);
+imshow(uint8(nx));title('增强图像')%画出增强图像
 
 % --- Executes on button press in pushbutton37.
 function pushbutton37_Callback(hObject, eventdata, handles)
@@ -1794,6 +1835,23 @@ switch get(hObject,'value')
         imshow(uint8(J));title('Prewitt算子')
     case 4
         disp('Isotropic算子');
+        [m,n]=size(x); 
+        x=double(x); 
+        b=zeros(m,n); 
+        c=zeros(m,n); 
+        for i=1:m-2 
+            for j=1:n-2 
+                b(i+1,j+1)=-x(i,j)-x(i+1,j)-x(i+2,j+2)+x(i,j+2)+x(i+1,j+2)+x(i+2,j+2); 
+                c(i+1,j+1)=x(i,j)+x(i,j+1)+x(i,j+2)-x(i+2,j)-x(i+2,j+1)-x(i+2,j+2); 
+                b(i+1,j+1)=sqrt(b(i+1,j+1)^2+c(i+1,j+1)^2)+100; 
+                %这儿处理有两种方式，绝对值和统一加一个数,不同的处理会得到不同的效果 
+                %if b(i+1,j+1)<0 
+                %   b(i+1,j+1)=-b(i+1,j+1); 
+                %end 
+            end 
+        end 
+        axes(handles.axes4);
+        imshow(uint8(b));title('Prewitt算子1')
 end
 
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu10 contents as cell array
@@ -1811,3 +1869,42 @@ function popupmenu10_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes during object creation, after setting all properties.
+function uipanel18_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to uipanel18 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on button press in pushbutton50.
+function pushbutton50_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton50 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+X=handles.I;
+%X=rgb2gray(X);
+%产生含噪图像
+init=26;
+randn('seed',init)
+x=double(X)+38*randn(size(X));
+%画出含噪图像
+axes(handles.axes2)
+imshow(x);
+title('含噪声图像');
+%下面进行图像的去噪处理
+%用小波函数sym4对x进行2层小波分解
+[c,s]=wavedec2(x,2,'sym4');
+%提取小波分解中第一层的低频图像，即实现了低通滤波去噪
+a1=wrcoef2('a',c,s,'sym4');
+%画出去噪后的图像
+axes(handles.axes3)
+imshow(a1);title('第一次去噪图像');
+%提取小波分解中第二层的低频图像，即实现了低通滤波去噪
+%相当于把第一层的低频图像经过再一次的低频滤波处理
+a2=wrcoef2('a',c,s,'sym4',2);
+%画出去噪后的图像
+axes(handles.axes4);
+imshow(a2);title('第二次去噪图像');
+
