@@ -20,6 +20,8 @@
 			2.1压缩
 			https://blog.csdn.net/ebowtang/article/details/50477720
 3.编码
+	哈夫曼编码：https://blog.csdn.net/tengweitw/article/details/45478497
+				https://blog.csdn.net/gaussrieman123/article/details/68060207
 	3.1.
 4.增强
 	4.2	灰度变换	
@@ -175,3 +177,79 @@ A：数据类型如果是double，imshow的处理范围是0-1
 //--------------------------4.17------------------------------------
 上面的逆滤波
 4.18 思路，先设计噪声是图像失真，之后着两种算法进行比较
+
+
+
+Gray=rgb2gray(Source);
+%以下程序为对原图像进行行程编码，压缩 ?
+Gray_Linear=Gray(:); 
+Gray_Length=length(Gray_Linear); 
+j=1; 
+index(1)=1; 
+for z=1:1:(length(Gray_Linear)-1) %行程编码程序段 ?
+    if Gray_Linear(z)==Gray_Linear(z+1); 
+        index(j)=index(j)+1; 
+    else
+        Encode(j)=Gray_Linear(z);
+        j=j+1; 
+        index(j)=1;
+    end 
+end
+Encode(j)=Gray_Linear(length(Gray_Linear)); %最后一个像素数据
+index=uint8(index);
+k=1;
+for i=1:1:j
+    if index(i)==1
+        Encode_hex(k)=Encode(i);% 十六进制的次数或者灰度值
+        k=k+1;
+    else
+        Encode_hex(k)=192+index(i);
+        k=k+1;
+        Encode_hex(k)=Encode(i);
+        k=k+1;
+    end
+end
+Encode_hex=dec2hex(Encode_hex);
+Encode_hex_Length=size(Encode_hex,1);%计算行程编码后的所占字节数，Encode_hex_Length
+index_Lenght=length(index);
+CR=Gray_Length/Encode_hex_Length; %比较压缩前与压缩后的大小 ?
+%行程编码解码 ?
+l=1; 
+for m=1:index_Lenght 
+    for n=1:1:index(m) 
+        Decode_temp(l)=Encode(m);
+        l=l+1; 
+    end 
+end 
+disp(Decode_temp);
+Decode=reshape(Decode_temp,6,4873); %重建二位图像数组 ?
+figure(1);
+subplot(121);imshow(Gray);title('原始灰度图'); %显示原图的二值图像 ?
+subplot(122);imshow(Gray);title('解压缩恢复后的图像'); %显示解压缩恢复后的图像 ?
+disp('压缩比：'); 
+disp(CR); 
+disp('原图像数据的长度：'); 
+disp(Gray_Length); 
+disp('压缩后图像数据的长度'); 
+disp(Encode_hex_Length); 
+disp('解压缩后的数据长度'); 
+disp(length(Decode_temp));
+
+
+
+I = imread('C:\Users\Administrator.SC-201902211420\Desktop\1858370454.png');
+ I=rgb2gray(I);
+[M,N] = size(I);
+ I1 = I(:);
+ P = zeros(1,256);
+ %获取各符号的概率；
+ for i = 0:255
+     P(i+1) = length(find(I1 == i))/(M*N);
+ end
+ k = 0:255;
+ dict = huffmandict(k,P); %生成字典
+ enco = huffmanenco(I1,dict); %编码
+ deco = huffmandeco(enco,dict); %解码
+ Ide = col2im(deco,[M,N],[M,N],'distinct'); %把向量重新转换成图像块；
+ subplot(1,2,1);imshow(I);title('original image');
+ subplot(1,2,2);imshow(uint8(Ide));title('deco image');
