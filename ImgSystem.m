@@ -220,6 +220,7 @@ set(handles.uipanel3,'Visible','off');
 set(handles.uipanel4,'Visible','off');
 set(handles.uipanel5,'Visible','off');
 set(handles.uipanel6,'Visible','on');
+set(handles.uipanel18,'Visible','off');
 
 
 % --- Executes when figure1 is resized.
@@ -1790,8 +1791,8 @@ function popupmenu10_Callback(hObject, eventdata, handles)
 % hObject    handle to popupmenu10 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-x=handles.I;
-x=rgb2gray(x);
+I=handles.I;
+x=rgb2gray(I);
 axes(handles.axes2);
 imshow(uint8(x));title('灰度图像')
 switch get(hObject,'value')
@@ -1835,23 +1836,33 @@ switch get(hObject,'value')
         imshow(uint8(J));title('Prewitt算子')
     case 4
         disp('Isotropic算子');
-        [m,n]=size(x); 
-        x=double(x); 
-        b=zeros(m,n); 
-        c=zeros(m,n); 
-        for i=1:m-2 
-            for j=1:n-2 
-                b(i+1,j+1)=-x(i,j)-x(i+1,j)-x(i+2,j+2)+x(i,j+2)+x(i+1,j+2)+x(i+2,j+2); 
-                c(i+1,j+1)=x(i,j)+x(i,j+1)+x(i,j+2)-x(i+2,j)-x(i+2,j+1)-x(i+2,j+2); 
-                b(i+1,j+1)=sqrt(b(i+1,j+1)^2+c(i+1,j+1)^2)+100; 
-                %这儿处理有两种方式，绝对值和统一加一个数,不同的处理会得到不同的效果 
-                %if b(i+1,j+1)<0 
-                %   b(i+1,j+1)=-b(i+1,j+1); 
-                %end 
-            end 
-        end 
-        axes(handles.axes4);
-        imshow(uint8(b));title('Prewitt算子1')
+%         [m,n]=size(x); 
+%         x=double(x); 
+%         b=zeros(m,n); 
+%         c=zeros(m,n); 
+%         for i=1:m-2 
+%             for j=1:n-2 
+%                 b(i+1,j+1)=-x(i,j)-x(i+1,j)-x(i+2,j+2)+x(i,j+2)+x(i+1,j+2)+x(i+2,j+2); 
+%                 c(i+1,j+1)=x(i,j)+x(i,j+1)+x(i,j+2)-x(i+2,j)-x(i+2,j+1)-x(i+2,j+2); 
+%                 b(i+1,j+1)=sqrt(b(i+1,j+1)^2+c(i+1,j+1)^2)+100; 
+%                 %这儿处理有两种方式，绝对值和统一加一个数,不同的处理会得到不同的效果 
+%                 %if b(i+1,j+1)<0 
+%                 %   b(i+1,j+1)=-b(i+1,j+1); 
+%                 %end 
+%             end 
+%         end 
+%         h2=fspecial('sobel');
+%         I2=filter2(h2,x);
+        [H,W]=size(x);
+        M=double(x);
+        J=M;
+        for i=2:H-1
+            for j=2:W-1
+                J(i,j)=abs(M(i-1,j+1)-M(i-1,j-1)+sqrt(2)*M(i,j+1)-sqrt(2)*M(i,j-1)+M(i+1,j+1)-M(i+1,j-1))+abs(M(i+1,j-1)-M(i-1,j-1)+sqrt(2)*M(i+1,j)-sqrt(2)*M(i-1,j)+M(i+1,j+1)-M(i-1,j+1));
+            end
+        end
+        axes(handles.axes3);
+        imshow(uint8(J));title('Isotropic算子')
 end
 
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu10 contents as cell array

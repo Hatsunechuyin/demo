@@ -108,7 +108,7 @@ xlabel,ylabel,text,legend等中此用法类似
 				  https://blog.csdn.net/samkieth/article/details/50389845
 				  https://wenku.baidu.com/view/92b910da76a20029bd642d45.html
 					梯度算子(微分法)
-					其他锐化算子
+					其他锐化算子  https://www.docin.com/p-1721495503.html?docfrom=rrela
 					拉普拉斯算子
 		锐化图像 = 原图像 + 加重的边缘
 
