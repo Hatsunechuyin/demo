@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 17-Apr-2019 22:46:46
+% Last Modified by GUIDE v2.5 18-Apr-2019 14:23:26
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -659,7 +659,7 @@ len=28;%运动位移
 theta=14;%运动角度
 PSF=fspecial('motion',len,theta);
 blurred=imfilter(I,PSF,'conv','circular');%读入无噪声模糊图像，并命名blurred
-wnrl=deconvwnr(blurred,PSF,0.0001);%维纳滤波复原图像
+wnrl=deconvwnr(blurred,PSF,0.0005);%维纳滤波复原图像
 axes(handles.axes2);
 imshow(blurred);title('由运动形成模糊图像');%显示模糊图像
 axes(handles.axes3);
@@ -1290,7 +1290,21 @@ function pushbutton26_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton26 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-Laplace=[0 1 0;1 -4 1;0 1 0];
+x=handles.I;
+x=rgb2gray(x);
+[m,n]=size(x); 
+x=double(x); 
+b=zeros(m,n); 
+c=zeros(m,n); 
+for i=1:m-2 
+    for j=1:n-2 
+        b(i+1,j+1)=x(i,j)-x(i+1,j+1); 
+        c(i+1,j+1)=x(i,j+1)-x(i+1,j); 
+        b(i+1,j+1)=sqrt(b(i+1,j+1)^2+c(i+1,j+1)^2)+100; 
+    end
+end
+axes(handles.axes4);
+imshow(uint8(b));title('梯度算子');
 
 
 
@@ -1495,24 +1509,60 @@ function pushbutton35_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton35 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[file path]=uigetfile('*.bmp;*.jpg;*.png','请选择一幅图像');
-if file==0 warndlg('您得输入一幅已失真图像');
-%警告对话框提示输入合法图像文件
-else
-    I1=imread(fullfile(path,file));
-    axes(handles.axes2);
-    imshow(I1);title('失真图像');
-end
-len=1.5;%运动位移
-theta=1.5;%运动角度
-PSF=fspecial('motion',len,theta);
-%blurred=imfilter(I,PSF,'conv','circular');%读入无噪声模糊图像，并命名blurred
-blurred=I1;
-wnrl=deconvwnr(blurred,PSF,0.0001);%维纳滤波复原图像
-  %axes(handles.axes3);
-%imshow(blurred);title('由运动形成模糊图像');%显示模糊图像
+image_o=handles.I;
+axes(handles.axes2);
+imshow(image_o);title('退化图像');
+%频率域退化图像，退化函数H(u,v)=exp(-0.0025*( (u-M/2).^2+(v-N/2).^2).^(5/6) )
+%傅里叶变换
+f=im2double(image_o);
+F=fft2(f);
+F=fftshift(F);
+%执行退化
+[M,N]=size(F);
+[u,v]=meshgrid(1:M,1:N);%生成二维坐标系
+H=-exp(0.0025*((u-M/2).^2+(v-N/2).^2).^(5/6));
+[m,n]=size(H)
+disp(m);
+disp(n);
+F=F.*H;
+%傅里叶反变换
+X=ifftshift(F);
+x=ifft2(X);
+x=uint8(abs(x)*256);
 axes(handles.axes3);
-imshow(wnrl);title('维纳滤波复原图像');%显示复原图像
+imshow(F);title('退化图像');
+%image_d=imread('C:\Program Files\MATLAB\R2013a\bin\work\图像复原\lena_deterioration.bmp');
+image_d=x;
+%直接逆滤波图像复原
+ff=im2double(image_d);%将图像灰度值归一化到0-1之间
+% 傅里叶变换
+f_Id=fft2(ff);
+f_Id=fftshift(f_Id);
+fH_Id=f_Id;
+[M,N]=size(fH_Id);
+% 逆滤波
+threshold=10;
+if threshold>M/2
+        %全滤波
+        fH_Id=fH_Id./(H+eps);
+else
+        %对一定半径范围内进行滤波
+        for i=1:M
+            for j=1:N
+                if sqrt((i-M/2).^2+(j-N/2).^2)<threshold
+                    fH_Id(i,j)=fH_Id(i,j)./(H(i,j)+eps);
+                end
+            end
+        end
+end
+
+% 执行傅立叶逆变换
+fH_Id1=ifftshift(fH_Id);
+f_new=ifft2(fH_Id1);
+f_new=uint8(abs(f_new)*255);
+axes(handles.axes4);
+imshow(f_new);title('滤波半径=78的逆滤波复原图像');
+
 
 
 % --- Executes on button press in pushbutton36.
@@ -1520,3 +1570,244 @@ function pushbutton36_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton36 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton37.
+function pushbutton37_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton37 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton38.
+function pushbutton38_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton38 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+function edit9_Callback(hObject, eventdata, handles)
+% hObject    handle to edit9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit9 as text
+%        str2double(get(hObject,'String')) returns contents of edit9 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit9_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit9 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on slider movement.
+function slider3_Callback(hObject, eventdata, handles)
+% hObject    handle to slider3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+
+
+% --- Executes during object creation, after setting all properties.
+function slider3_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on button press in pushbutton39.
+function pushbutton39_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton39 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+function edit10_Callback(hObject, eventdata, handles)
+% hObject    handle to edit10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit10 as text
+%        str2double(get(hObject,'String')) returns contents of edit10 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit10_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in popupmenu8.
+function popupmenu8_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu8 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu8
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu8_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu8 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pushbutton40.
+function pushbutton40_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton40 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+
+function edit11_Callback(hObject, eventdata, handles)
+% hObject    handle to edit11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit11 as text
+%        str2double(get(hObject,'String')) returns contents of edit11 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit11_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit12_Callback(hObject, eventdata, handles)
+% hObject    handle to edit12 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit12 as text
+%        str2double(get(hObject,'String')) returns contents of edit12 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit12_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit12 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pushbutton41.
+function pushbutton41_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton41 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on selection change in popupmenu10.
+function popupmenu10_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+x=handles.I;
+x=rgb2gray(x);
+axes(handles.axes2);
+imshow(uint8(x));title('灰度图像')
+switch get(hObject,'value')
+    case 1
+    case 2
+        disp('Sobel算子');
+        [H,W]=size(x);
+        M=double(x);
+        J=M;
+        for i=2:H-1
+            for j=2:W-1
+                J(i,j)=abs(M(i-1,j+1)-M(i-1,j-1)+2*M(i,j+1)-2*M(i,j-1)+M(i+1,j+1)-M(i+1,j-1))+abs(M(i-1,j-1)-M(i+1,j-1)+2*M(i-1,j)-2*M(i+1,j)+M(i-1,j+1)-M(i+1,j+1));
+            end
+        end
+        axes(handles.axes3);
+        imshow(uint8(J));title('Sobel算子')
+    case 3
+        disp('Prewitt算子');
+        [H,W]=size(x);
+        M=double(x);
+        J=M;
+        for i=2:H-1
+            for j=2:W-1
+                J(i,j)=abs(M(i-1,j+1)-M(i-1,j-1)+M(i,j+1)-M(i,j-1)+M(i+1,j+1)-M(i+1,j-1))+abs(M(i+1,j-1)-M(i-1,j-1)+M(i+1,j)-M(i-1,j)+M(i+1,j+1)-M(i-1,j+1));
+            end
+        end
+        %b=zeros(m,n); 
+        %c=zeros(m,n); 
+        %for i=1:m-2 
+        %    for j=1:n-2 
+        %        b(i+1,j+1)=-x(i,j)-x(i+1,j)-x(i+2,j+2)+x(i,j+2)+x(i+1,j+2)+x(i+2,j+2); 
+        %        c(i+1,j+1)=x(i,j)+x(i,j+1)+x(i,j+2)-x(i+2,j)-x(i+2,j+1)-x(i+2,j+2); 
+        %        b(i+1,j+1)=sqrt(b(i+1,j+1)^2+c(i+1,j+1)^2)+100; 
+        %        %这儿处理有两种方式，绝对值和统一加一个数,不同的处理会得到不同的效果 
+        %        %if b(i+1,j+1)<0 
+        %        % b(i+1,j+1)=-b(i+1,j+1); 
+        %        %end 
+        %    end 
+        %end
+        axes(handles.axes3);
+        imshow(uint8(J));title('Prewitt算子')
+    case 4
+        disp('Isotropic算子');
+end
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu10 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu10
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu10_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

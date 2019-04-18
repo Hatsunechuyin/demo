@@ -100,6 +100,8 @@ xlabel,ylabel,text,legend等中此用法类似
 
 //19.4.15
 		图像锐化：https://blog.csdn.net/u010703122/article/details/49308361
+				  https://blog.csdn.net/samkieth/article/details/50389845
+				  https://wenku.baidu.com/view/92b910da76a20029bd642d45.html
 					梯度算子(微分法)
 					其他锐化算子
 					拉普拉斯算子
@@ -168,3 +170,4 @@ A：数据类型如果是double，imshow的处理范围是0-1
 
 //--------------------------4.17------------------------------------
 上面的逆滤波
+4.18 思路，先设计噪声是图像失真，之后着两种算法进行比较
