@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 19-Apr-2019 14:27:36
+% Last Modified by GUIDE v2.5 21-Apr-2019 23:57:18
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -585,15 +585,34 @@ function pushbutton7_Callback(hObject, eventdata, handles)
         [zipped,info]=huffencode(Gray);%调用哈夫曼编码程序进行压缩
         unzipped=huffdecode(zipped,info);%调用哈夫曼解码程序进行解码
         %L=info.avalen;disp(L);%平均码长
-        %CR=info.ratio;disp(CR);%压缩比
-       % H=info.h;disp(H);%信息熵
-       % CE=info.ce;disp(CE);%编码效率
+        CR=info.ratio;%disp(CR);%压缩比
+        %H=info.h;disp(H);%信息熵
+        %CE=info.ce;disp(CE);%编码效率
         axes(handles.axes3);title('解码后的图像');
         imshow(unzipped);
-        disp('平均码长');L=info.maxcodelen
-        disp('压缩比');CR=info.ratio
-        disp('信息熵');H=info.h
-        disp('编码效率');CE=info.ce
+        %disp('平均码长');L=info.maxcodelen
+        %disp('压缩比');CR=info.ratio
+        set(handles.text34,'String',CR);
+        [m,n]=size(Gray);
+        set(handles.text35,'String',m*n);
+        set(handles.text37,'String',info.cols1);
+        [m,n]=size(unzipped);
+        set(handles.text39,'String',m*n);
+        e=double(Gray)-double(unzipped);
+        [m, n]=size(e);
+        erms=sqrt(sum(e(:).^2)/(m*n));
+        set(handles.text41,'String',erms);
+        %disp('信息熵');H=info.h
+        %disp('编码效率');CE=info.ce
+        %pad=info.pad
+        %huffcodes=info.huffcodes
+        %ratio=info.ratio
+        %length1=info.length
+        %maxcodelen=info.maxcodelen
+        %rows=info.rows
+        %info1=info.cols1
+        whos('Gray');
+        whos('unzipped');
     else
         warndlg('请先打开需要操作的图片');
     end
@@ -740,6 +759,7 @@ function pushbutton15_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
 J=rgb2gray(I);%将图片转变为灰色图像
+whos('J');
 axes(handles.axes2);
 imshow(J);title('原灰图像');
 K=dct2(J);%对图像做DCT变换
@@ -747,9 +767,10 @@ axes(handles.axes4);
 imshow(log(abs(K))+1,[0,10]);title('DCT变换结果');
 colormap(gray(4));colorbar;
 K(abs(K)<0.1)=0;
-I=idct2(K)/255;
+I1=idct2(K)/255;
+whos('K');
 axes(handles.axes3);
-imshow(I);title('压缩后的图片');
+imshow(I1);title('压缩后的图片');
 
 % --- Executes on button press in pushbutton16.
 function pushbutton16_Callback(hObject, eventdata, handles)
@@ -1979,14 +2000,22 @@ axes(handles.axes2);
 imshow(Gray);title('原始灰度图'); %显示原图的二值图像 
 axes(handles.axes3);
 imshow(Decode,[]);title('解压缩恢复后的图像'); %显示解压缩恢复后的图像 ?
-disp('压缩比：'); 
-disp(CR); 
-disp('原图像数据的长度：'); 
-disp(Gray_Length); 
-disp('压缩后图像数据的长度'); 
-disp(Encode_hex_Length); 
-disp('解压缩后的数据长度'); 
-disp(length(Decode_temp));
+set(handles.text34,'String',CR)
+set(handles.text35,'String',Gray_Length)
+set(handles.text37,'String',Encode_hex_Length)
+set(handles.text39,'String',length(Decode_temp))
+e=double(Gray)-double(Decode);
+[m, n]=size(e);
+erms=sqrt(sum(e(:).^2)/(m*n));
+set(handles.text41,'String',erms);
+%disp('压缩比：'); 
+%disp(CR); 
+%disp('原图像数据的长度：'); 
+%disp(Gray_Length); 
+%disp('压缩后图像数据的长度'); 
+%disp(Encode_hex_Length); 
+%disp('解压缩后的数据长度'); 
+%disp(length(Decode_temp));
 
 
 % --- Executes on button press in pushbutton52.
@@ -1994,57 +2023,118 @@ function pushbutton52_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton52 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-Source=handles.I;
-Gray=rgb2gray(Source);
-%以下程序为对原图像进行行程编码，压缩 ?
-Gray_Linear=Gray(:); 
-Gray_Length=length(Gray_Linear); 
-j=1; index(1)=1; 
-for z=1:1:(length(Gray_Linear)-1) %行程编码程序段 ?
-    if Gray_Linear(z)==Gray_Linear(z+1); 
-        index(j)=index(j)+1; 
-    else
-        Encode(j)=Gray_Linear(z);
-        j=j+1; 
-        index(j)=1;
-    end 
+I=handles.I;
+I=rgb2gray(I);
+x=double(I);
+y=LPCencode(x);   
+xx=LPCdecode(y);
+%显示预测误差值
+%figure(1);
+%subplot(121);title('1');
+%imshow(I);
+%subplot(122);
+axes(handles.axes2);
+imshow(mat2gray(y));title('预测误差图像')
+%计算均方差误差，因为是无损编码，那么erms应该为０
+e=double(x)-double(xx);
+[m, n]=size(e);
+erms=sqrt(sum(e(:).^2)/(m*n));
+%CR=x/y;
+set(handles.text34,'String','-');
+%[m,n]=size(x)
+set(handles.text35,'String','-');
+%[m,n]=size(y)
+set(handles.text37,'String','-');
+%[m,n]=size(xx)
+set(handles.text39,'String','-');
+set(handles.text41,'String',erms);
+%显示原图直方图
+%figure(2);
+%subplot(121);
+axes(handles.axes3);
+[h, f]=hist(x(:));    
+bar(f,h,'k');title('原图直方图');
+%显示预测误差的直方图
+%subplot(122);
+axes(handles.axes4);
+[h, f]=hist(y(:));    
+bar(f, h,'k');title('预测误差的直方图');
+%编码器%LPCencode函数用一维无损预测编码压缩图像x,a为预测系数，如果a默认，则默认a=１，就是前值预测。
+function y=LPCencode(x, a)
+%error(nargchk(1, 2, nargin));
+if nargin<2
+    a=1;
 end
-Encode(j)=Gray_Linear(length(Gray_Linear));%最后一个像素数据
-index=uint8(index);
-k=1;
-for i=1:1:j
-    if index(i)==1
-        Encode_hex(k)=Encode(i);% 十六进制的次数或者灰度值
-        k=k+1;
-    else
-        Encode_hex(k)=192+index(i);
-        k=k+1;
-        Encode_hex(k)=Encode(i);
-        k=k+1;
-    end
+x=double(x);   
+[m, n]=size(x);
+p=zeros(m, n);  %存放预测值
+xs=x;   
+zc=zeros(m, 1);
+for i=1:length(a)
+    xs=[zc  xs(:, 1:end-1)];    
+    p=p+a(i)*xs;
 end
-Encode_hex=dec2hex(Encode_hex);
-Encode_hex_Length=size(Encode_hex,1);%计算行程编码后的所占字节数，Encode_hex_Length
-index_Lenght=length(index); 
-CR=Gray_Length/Encode_hex_Length; %比较压缩前与压缩后的大小 ?
-%行程编码解码 ?
-l=1; 
-for m=1:index_Lenght 
-    for n=1:1:index(m) 
-        Decode_temp(l)=Encode(m);
-        l=l+1; 
-    end 
-end 
-Decode=reshape(Decode_temp,384,512); %重建二位图像数组 ?
-figure(1);
-subplot(121);imshow(Gray);title('原始灰度图');%显示原图的二值图像 ?
-subplot(122);imshow(Decode);title('解压缩恢复后的图像'); %显示解压缩恢复后的图像 ?
-disp('压缩比：'); 
-disp(CR); 
-disp('原图像数据的长度：'); 
-disp(Gray_Length); 
-disp('压缩后图像数据的长度'); 
-disp(Encode_hex_Length); 
-disp('解压缩后的数据长度'); 
-disp(length(Decode_temp));
+y=x-round(p);
+%解码器
+%LPCdecode函数的解码程序，与编码程序用的是同一个预测器
+function x=LPCdecode(y, a)
+error(nargchk(1, 2, nargin));
+if nargin<2
+    a=1;
+end
+a=a(end: -1: 1);     
+[m, n]=size(y);     
+order=length(a);
+a=repmat(a, m, 1);      
+x=zeros(m, n+order);
+for i=1:n
+ ii=i+order;
+x(:, ii)=y(:, i)+round(sum(a(:, order: -1: 1).*x(:, (ii-1): -1:(ii-order)), 2));
+end
+x=x(:, order+1: end);
 
+
+% --- Executes on selection change in popupmenu11.
+function popupmenu11_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu11 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu11
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu11_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu11 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in popupmenu12.
+function popupmenu12_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu12 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu12 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu12
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu12_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu12 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

@@ -1,6 +1,7 @@
 //https://jingyan.baidu.com/article/359911f5a9e0bc57fe030617.html(matlab GUI怎么设计点击菜单项切换GUI界面？)
 
 整体的毕设流程：https://github.com/Hatsunechuyin/demo.git
+				https://wenku.baidu.com/view/ddd23318a2161479171128f3.html
 
 毕业设计结构目录
 1、-------
@@ -19,10 +20,13 @@
 		2.2.2小波变换
 			2.1压缩
 			https://blog.csdn.net/ebowtang/article/details/50477720
+			压缩比=压缩前字节数/压缩后字节数，如第一次压缩的压缩比=199680/148296
 3.编码
+	https://blog.csdn.net/weixin_39569242/article/details/81156518
 	哈夫曼编码：https://blog.csdn.net/tengweitw/article/details/45478497
 				https://blog.csdn.net/gaussrieman123/article/details/68060207
 				http://www.doc88.com/p-7864984101090.html
+	预测编码：https://blog.csdn.net/dai_wen/article/details/78891644
 	3.1.
 4.增强
 	4.2	灰度变换	
