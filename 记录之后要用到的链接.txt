@@ -22,6 +22,7 @@
 3.编码
 	哈夫曼编码：https://blog.csdn.net/tengweitw/article/details/45478497
 				https://blog.csdn.net/gaussrieman123/article/details/68060207
+				http://www.doc88.com/p-7864984101090.html
 	3.1.
 4.增强
 	4.2	灰度变换	
@@ -233,6 +234,61 @@ disp(Gray_Length);
 disp('压缩后图像数据的长度'); 
 disp(Encode_hex_Length); 
 disp('解压缩后的数据长度'); 
+disp(length(Decode_temp));
+
+
+
+Gray=rgb2gray(Source);
+%以下程序为对原图像进行行程编码，压缩 ?
+Gray_Linear=Gray(:); ?
+Gray_Length=length(Gray_Linear); ?
+j=1; ?index(1)=1; ?
+for z=1:1:(length(Gray_Linear)-1) %行程编码程序段 ?
+????if Gray_Linear(z)==Gray_Linear(z+1); ?
+????????index(j)=index(j)+1; ?
+????else ?
+????????Encode(j)=Gray_Linear(z);
+????????j=j+1; ?
+????????index(j)=1;
+????end ?
+end
+Encode(j)=Gray_Linear(length(Gray_Linear)); ??%最后一个像素数据
+index=uint8(index);
+k=1;
+for i=1:1:j
+????if index(i)==1
+????????Encode_hex(k)=Encode(i);???% 十六进制的次数或者灰度值
+????????k=k+1;
+????else
+????????Encode_hex(k)=192+index(i);
+????????k=k+1;
+????????Encode_hex(k)=Encode(i);
+????????k=k+1;
+????end
+end
+Encode_hex=dec2hex(Encode_hex);
+Encode_hex_Length=size(Encode_hex,1);%计算行程编码后的所占字节数，Encode_hex_Length
+index_Lenght=length(index); ?
+CR=Gray_Length/Encode_hex_Length; ??%比较压缩前与压缩后的大小 ?
+%行程编码解码 ?
+l=1; ?
+for m=1:index_Lenght ?
+????for n=1:1:index(m) ?
+????????Decode_temp(l)=Encode(m);
+????????l=l+1; ?
+????end ?
+end ?
+Decode=reshape(Decode_temp,500,500); ???%重建二位图像数组 ?
+figure(1);
+subplot(121);imshow(Gray);title('原始灰度图'); ???%显示原图的二值图像 ?
+subplot(122);imshow(Decode);title('解压缩恢复后的图像'); ?%显示解压缩恢复后的图像 ?
+disp('压缩比：'); ?
+disp(CR); ?
+disp('原图像数据的长度：'); ?
+disp(Gray_Length); ?
+disp('压缩后图像数据的长度'); ?
+disp(Encode_hex_Length); ?
+disp('解压缩后的数据长度'); ?
 disp(length(Decode_temp));
 
 

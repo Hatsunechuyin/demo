@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 18-Apr-2019 16:05:49
+% Last Modified by GUIDE v2.5 19-Apr-2019 14:27:36
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -588,8 +588,12 @@ function pushbutton7_Callback(hObject, eventdata, handles)
         %CR=info.ratio;disp(CR);%压缩比
        % H=info.h;disp(H);%信息熵
        % CE=info.ce;disp(CE);%编码效率
-        axes(handles.axes3);
+        axes(handles.axes3);title('解码后的图像');
         imshow(unzipped);
+        disp('平均码长');L=info.maxcodelen
+        disp('压缩比');CR=info.ratio
+        disp('信息熵');H=info.h
+        disp('编码效率');CE=info.ce
     else
         warndlg('请先打开需要操作的图片');
     end
@@ -1071,7 +1075,8 @@ function pushbutton23_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
-I_2D=D3_To_D2(I);
+%I_2D=D3_To_D2(I);
+I_2D=rgb2gray(I);
 I1=fft2(I_2D);
 I2=uint8(real(ifft2(I1)));
 I1=log(1+abs(fftshift(I1)));
@@ -1327,7 +1332,7 @@ for i=1:m-2
         b(i+1,j+1)=sqrt(b(i+1,j+1)^2+c(i+1,j+1)^2)+100; 
     end
 end
-axes(handles.axes4);
+axes(handles.axes3);
 imshow(uint8(b));title('梯度算子');
 
 
@@ -1544,11 +1549,13 @@ F=fftshift(F);
 %执行退化
 [M,N]=size(F);
 [u,v]=meshgrid(1:M,1:N);%生成二维坐标系
-H=-exp(0.0025*((u-M/2).^2+(v-N/2).^2).^(5/6));
-[m,n]=size(H)
+H=-exp(0.0025.*((u-M./2).^2+(v-N./2).^2).^(5./6));
+[m,n]=size(H);
 disp(m);
 disp(n);
-F=F.*H;
+disp(M);
+disp(N);
+F=F*H';
 %傅里叶反变换
 X=ifftshift(F);
 x=ifft2(X);
@@ -1579,7 +1586,6 @@ else
             end
         end
 end
-
 % 执行傅立叶逆变换
 fH_Id1=ifftshift(fH_Id);
 f_new=ifft2(fH_Id1);
@@ -1898,7 +1904,7 @@ X=handles.I;
 %X=rgb2gray(X);
 %产生含噪图像
 init=26;
-randn('seed',init)
+randn('seed',init);
 x=double(X)+38*randn(size(X));
 %画出含噪图像
 axes(handles.axes2)
@@ -1918,4 +1924,127 @@ a2=wrcoef2('a',c,s,'sym4',2);
 %画出去噪后的图像
 axes(handles.axes4);
 imshow(a2);title('第二次去噪图像');
+
+
+
+% --- Executes on button press in pushbutton51.
+function pushbutton51_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton51 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+Gray=rgb2gray(I);
+%以下程序为对原图像进行行程编码，压缩 ?
+Gray_Linear=Gray(:); 
+Gray_Length=length(Gray_Linear); 
+j=1; 
+index(1)=1; 
+for z=1:1:(length(Gray_Linear)-1) %行程编码程序段 ?
+    if Gray_Linear(z)==Gray_Linear(z+1); 
+        index(j)=index(j)+1; 
+    else
+        Encode(j)=Gray_Linear(z);
+        j=j+1; 
+        index(j)=1;
+    end 
+end
+Encode(j)=Gray_Linear(length(Gray_Linear)); %最后一个像素数据
+index=uint8(index);
+k=1;
+for i=1:1:j
+    if index(i)==1
+        Encode_hex(k)=Encode(i);% 十六进制的次数或者灰度值
+        k=k+1;
+    else
+        Encode_hex(k)=192+index(i);
+        k=k+1;
+        Encode_hex(k)=Encode(i);
+        k=k+1;
+    end
+end
+Encode_hex=dec2hex(Encode_hex);
+Encode_hex_Length=size(Encode_hex,1);%计算行程编码后的所占字节数，Encode_hex_Length
+index_Lenght=length(index);
+CR=Gray_Length/Encode_hex_Length; %比较压缩前与压缩后的大小 ?
+%行程编码解码 ?
+l=1; 
+for m=1:index_Lenght 
+    for n=1:1:index(m) 
+        Decode_temp(l)=Encode(m);
+        l=l+1; 
+    end 
+end 
+Decode=reshape(Decode_temp,384,512); %重建二位图像数组 图像的长跟宽，这边使用的图像库图片长度一样384*512
+axes(handles.axes2);
+imshow(Gray);title('原始灰度图'); %显示原图的二值图像 
+axes(handles.axes3);
+imshow(Decode,[]);title('解压缩恢复后的图像'); %显示解压缩恢复后的图像 ?
+disp('压缩比：'); 
+disp(CR); 
+disp('原图像数据的长度：'); 
+disp(Gray_Length); 
+disp('压缩后图像数据的长度'); 
+disp(Encode_hex_Length); 
+disp('解压缩后的数据长度'); 
+disp(length(Decode_temp));
+
+
+% --- Executes on button press in pushbutton52.
+function pushbutton52_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton52 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+Source=handles.I;
+Gray=rgb2gray(Source);
+%以下程序为对原图像进行行程编码，压缩 ?
+Gray_Linear=Gray(:); 
+Gray_Length=length(Gray_Linear); 
+j=1; index(1)=1; 
+for z=1:1:(length(Gray_Linear)-1) %行程编码程序段 ?
+    if Gray_Linear(z)==Gray_Linear(z+1); 
+        index(j)=index(j)+1; 
+    else
+        Encode(j)=Gray_Linear(z);
+        j=j+1; 
+        index(j)=1;
+    end 
+end
+Encode(j)=Gray_Linear(length(Gray_Linear));%最后一个像素数据
+index=uint8(index);
+k=1;
+for i=1:1:j
+    if index(i)==1
+        Encode_hex(k)=Encode(i);% 十六进制的次数或者灰度值
+        k=k+1;
+    else
+        Encode_hex(k)=192+index(i);
+        k=k+1;
+        Encode_hex(k)=Encode(i);
+        k=k+1;
+    end
+end
+Encode_hex=dec2hex(Encode_hex);
+Encode_hex_Length=size(Encode_hex,1);%计算行程编码后的所占字节数，Encode_hex_Length
+index_Lenght=length(index); 
+CR=Gray_Length/Encode_hex_Length; %比较压缩前与压缩后的大小 ?
+%行程编码解码 ?
+l=1; 
+for m=1:index_Lenght 
+    for n=1:1:index(m) 
+        Decode_temp(l)=Encode(m);
+        l=l+1; 
+    end 
+end 
+Decode=reshape(Decode_temp,384,512); %重建二位图像数组 ?
+figure(1);
+subplot(121);imshow(Gray);title('原始灰度图');%显示原图的二值图像 ?
+subplot(122);imshow(Decode);title('解压缩恢复后的图像'); %显示解压缩恢复后的图像 ?
+disp('压缩比：'); 
+disp(CR); 
+disp('原图像数据的长度：'); 
+disp(Gray_Length); 
+disp('压缩后图像数据的长度'); 
+disp(Encode_hex_Length); 
+disp('解压缩后的数据长度'); 
+disp(length(Decode_temp));
 
