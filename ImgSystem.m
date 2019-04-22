@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 21-Apr-2019 23:57:18
+% Last Modified by GUIDE v2.5 22-Apr-2019 20:31:04
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -510,6 +510,11 @@ global fil;%高斯跟巴特沃斯的选择
 fil=1;
 global filter;%高通滤波跟低通滤波
 filter=1;
+global lossyComCR;%压缩比
+lossyComCR=0;%对应第一个
+global lossyComTrans;
+lossyComTrans=1;
+
 
 
 
@@ -770,66 +775,37 @@ K(abs(K)<0.1)=0;
 I1=idct2(K)/255;
 whos('K');
 axes(handles.axes3);
-imshow(I1);title('压缩后的图片');
+imshow(I1);title('变换后的图片');
 
 % --- Executes on button press in pushbutton16.
 function pushbutton16_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton16 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% I=handles.I;
-% I=rgb2gray(I);
-% sig=double(I)/255;
-% [m_sig,n_sig]=size(sig);%图像大小
-% sizi=16;                %给出图像分块和保留系数的个数
-% Snum=108;
-% %分块和进行变换
-% T=hadamard(sizi);
-% hdcoe=blkproc(sig,[sizi sizi],'P1*x*P2',T,T);
-% %重新排列系数
-% coe=im2col(hdcoe,[sizi sizi],'distinct');
-% coe_temp=coe;
-% [Y,Ind]=sort(coe);
-% %舍去较小方差的系数
-% [m,n]=size(coe);
-% Snum=m-Snum;
-% for i=1:n
-%     coe_temp(Ind(1:Snum),i)=0;
-% end
-% %重建图像
-% re_hdcoe=col2im(coe_temp,[sizi sizi],[m_sig n_sig],'distinct');
-% re_sig=blkproc(re_hdcoe,[sizi sizi],'P1*x*P2',T,T);
-% %figure,imshow(uint8(re_sig));
-% error=sig.^2-re_sig.^2;
-% MSE=sum(error(:)/numel(re_sig))
-% axes(handles.axes2)
-% imshow(sig);title('灰度图像');
-% axes(handles.axes3)
-% imshow(uint8(re_sig));title('压缩后的图像')
 im_l=handles.I;
-im_l1=im2double(im_l);
-im_l2=rgb2gray(im_l1);
-%对图像进行哈达玛变换
-H=hadamard(512);%产生512X512的Hadamard矩阵
-haImg=H*im_l2*H;
-haImg2=haImg/512;
-%对图像进行哈达玛逆变换
-hhaImg=H'*haImg2*H';
-hhaImg2=hhaImg/512;
-haImg1=im2uint8(haImg);
-hhaImg1=im2uint8(hhaImg2);
-subplot(2,2,1);
-imshow(im_l);
-title('原图');
-subplot(2,2,2);
-imshow(im_l2);
-title('灰度图');
-subplot(2,2,3);
-imshow(haImg2);
-title('图像的二维离散Hadamard变换');
-subplot(2,2,4);
-imshow(hhaImg1);
-title('图像的二维离散Hadamard逆变换');
+im_l1=im2double(im_l);  
+im_l2=rgb2gray(im_l1);  
+%对图像进行哈达玛变换  
+H=hadamard(512);%产生512X512的Hadamard矩阵  
+haImg=H*im_l2*H;  
+haImg2=haImg/512;  
+%对图像进行哈达玛逆变换  
+hhaImg=H'*haImg2*H';  
+hhaImg2=hhaImg/512;  
+haImg1=im2uint8(haImg);  
+hhaImg1=im2uint8(hhaImg2);  
+subplot(2,2,1);  
+imshow(im_l);  
+title('原图');  
+subplot(2,2,2);  
+imshow(im_l2);  
+title('灰度图');  
+subplot(2,2,3);  
+imshow(haImg2);  
+title('图像的二维离散Hadamard变换');  
+subplot(2,2,4);  
+imshow(hhaImg1);  
+title('图像的二维离散Hadamard逆变换');  
 
 % --- Executes on button press in pushbutton17.
 function pushbutton17_Callback(hObject, eventdata, handles)
@@ -1342,6 +1318,8 @@ function pushbutton26_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 x=handles.I;
 x=rgb2gray(x);
+axes(handles.axes2);
+imshow(uint8(x));title('灰度图像');
 [m,n]=size(x); 
 x=double(x); 
 b=zeros(m,n); 
@@ -1399,7 +1377,7 @@ switch filter
         bRadius=str2double(str(val));
         disp(bRadius);
     case 2
-        set(handles.popupmenu6,'string',{2,4,8});
+        set(handles.popupmenu6,'string',{2,8,16});
         str=get(handles.popupmenu6,'string');
         val=get(handles.popupmenu6,'value');
         bRadius=str2double(str(val));
@@ -1476,6 +1454,8 @@ global bRadius;
 disp(bRadius);
 I=handles.I;
 I1=rgb2gray(I);
+axes(handles.axes2);
+imshow(I1);title('灰度图像');
 I2=imnoise(I1,'gaussian',0.03);	 %加均值为0，方差为0.03的高斯噪声
 %I3=double(I2);
 fft_I=fft2(I2); 	% 二维离散傅立叶变换
@@ -1537,7 +1517,7 @@ switch fil
                 result1=uint8(real(ifft2(ifftshift(result))));
         end 
 end
-axes(handles.axes2);
+axes(handles.axes3);
 imshow(result1);title(title1);
 
 % --- Executes during object creation, after setting all properties.
@@ -2099,7 +2079,8 @@ function popupmenu11_Callback(hObject, eventdata, handles)
 % hObject    handle to popupmenu11 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+global lossyComTrans;
+lossyComTrans=get(hObject,'value');
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu11 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu11
 
@@ -2122,7 +2103,8 @@ function popupmenu12_Callback(hObject, eventdata, handles)
 % hObject    handle to popupmenu12 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+global lossyComCR;
+lossyComCR=get(hObject,'value');
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu12 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu12
 
@@ -2138,3 +2120,88 @@ function popupmenu12_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes during object creation, after setting all properties.
+function uipanel3_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to uipanel3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on button press in pushbutton55.
+function pushbutton55_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton55 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global lossyComCR;%压缩比
+global lossyComTrans;
+cr=0.5;       %压缩比为2:1
+switch lossyComCR
+    case 1
+        cr=0.5;     %2:1
+    case 2
+        cr=0.125;   %8:1
+end
+I=handles.I;
+I1=rgb2gray(I);
+%这里的图像是384*512，所以分割方式不同
+I1=double(I1)/255;
+whos('I1');
+axes(handles.axes2);
+imshow(I1);title('原图像的灰度图');
+switch lossyComTrans
+    case 1 
+    case 2
+        fftcoe=blkproc(I1,[8 8],'fft2(x)');%将图片分割成8*8的子图像进行fft48*64个
+        coevar=im2col(fftcoe,[8 8],'distinct');%将变换系数矩阵重新排列
+        coe=coevar;
+        [y,ind]=sort(coevar);
+        [m,n]=size(coevar);%根据压缩比确定要变0的系数个数
+        snum=64-64*cr;
+        %舍去不充分的系数
+        for i=1:n
+            coe(ind(1:snum),i)=0;
+        end
+        b2=col2im(coe,[8 8],[384 512],'distinct');%重新排列系数矩阵
+        %对子图像快进行fft逆变换获得个子图像的复原图像，并显示压缩图像
+        I2=blkproc(b2,[8 8],'ifft2(x)');
+        axes(handles.axes3);
+        imshow(I2);title(['(傅里叶)压缩比为',num2str(1/cr),':1的压缩图像']);
+        e=double(I1)-double(I2);
+        [m,n]=size(e);
+        erms=sqrt(sum(e(:).^2)/(m*n));
+        set(handles.text43,'String',erms);
+    case 3
+        %对图像进行哈达吗变换
+        t=hadamard(8);
+        htcoe=blkproc(I1,[8 8],'P1*x*P2',t,t);
+        coevar=im2col(htcoe,[8 8],'distinct');
+        coe=coevar;
+        [y,ind]=sort(coevar);
+        [m,n]=size(coevar);%根据压缩比确定要变0的系数个数
+        snum=64-64*cr;
+        %舍去不充分的系数
+        for i=1:n
+            coe(ind(1:snum),i)=0;%将最小的snum个数变换系数清0
+        end
+        b2=col2im(coe,[8 8],[384 512],'distinct');%重新排列系数矩阵
+        %对截取后的变换系数进行哈达吗逆变换
+        I2=blkproc(b2,[8 8],'P1*x*P2',t,t);
+        I2=I2./(8*8);
+        axes(handles.axes3);
+        imshow(I2);title(['(哈达吗)压缩比为',num2str(1/cr),':1的压缩图像']);
+        e=double(I1)-double(I2);
+        [m,n]=size(e);
+        erms=sqrt(sum(e(:).^2)/(m*n));
+        set(handles.text43,'String',erms);
+end
+%axes(handles.axes2);
+%imshow(result1);title(title1);
+
+
+% --- Executes during object creation, after setting all properties.
+function pushbutton55_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pushbutton55 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called

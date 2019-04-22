@@ -22,6 +22,7 @@
 			https://blog.csdn.net/ebowtang/article/details/50477720
 			压缩比=压缩前字节数/压缩后字节数，如第一次压缩的压缩比=199680/148296
 3.编码
+	https://www.docin.com/p-1781135371.html?docfrom=rrela
 	https://blog.csdn.net/weixin_39569242/article/details/81156518
 	哈夫曼编码：https://blog.csdn.net/tengweitw/article/details/45478497
 				https://blog.csdn.net/gaussrieman123/article/details/68060207
