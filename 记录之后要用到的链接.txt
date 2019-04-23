@@ -59,6 +59,9 @@ https://max.book118.com/html/2017/0628/118727842.shtm
 	https://blog.csdn.net/weixin_43418716/article/details/83629009
 	https://blog.csdn.net/m0_37565736/article/details/79840487#%E4%BA%8C%E5%9F%BA%E4%BA%8E%E5%8C%BA%E5%9F%9F%E7%9A%84%E5%9B%BE%E5%83%8F%E5%88%86%E5%89%B2
 	http://www.elecfans.com/rengongzhineng/605584_2.html
+	最小值：https://blog.csdn.net/u010839382/article/details/30799465
+	https://blog.csdn.net/whuhan2013/article/details/53977659
+	四叉树必须图像是2的整次幂
 
 
 为方便叙述设第一个GUI文件名为GUI_1，第二个GUI文件名为GUI_2

@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 23-Apr-2019 14:37:41
+% Last Modified by GUIDE v2.5 23-Apr-2019 21:38:57
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -92,18 +92,21 @@ function Open_Callback(hObject, eventdata, handles)
 % hObject    handle to Open (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-[file path]=uigetfile('*.bmp;*.jpg;*.png','请选择一幅图像');
-if file==0 warndlg('您得输入一幅图像');
-%警告对话框提示输入合法图像文件
-else
-    I=imread(fullfile(path,file));
-    axes(handles.axes1);
-    imshow(I);title('原图像');
-    handles.I=I;
+try
+    [file path]=uigetfile('*.bmp;*.jpg;*.png','请选择一幅图像');
+    if file==0 
+        %warndlg('请重新一幅图像');
+    %警告对话框提示输入合法图像文件
+    else
+        I=imread(fullfile(path,file));
+        axes(handles.axes1);
+        imshow(I);title('原图像');
+        handles.I=I;
+    end
+    %Update handles structure
+    guidata(hObject,handles);
+catch
 end
-%Update handles structure
-guidata(hObject,handles);
 
 % --- Executes when uipanel2 is resized.
 function uipanel2_SizeChangedFcn(hObject, eventdata, handles)
@@ -245,19 +248,21 @@ function Clear_Callback(hObject, eventdata, handles)
 % hObject    handle to Clear (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-%清除视图图片
-cla(handles.axes1,'reset');  %handles.axes1为显示图片窗口，reset即清除
-cla(handles.axes2,'reset');  %handles.axes2为显示图片窗口，reset即清除
-cla(handles.axes3,'reset');  %handles.axes3为显示图片窗口，reset即清除
-cla(handles.axes4,'reset');  %handles.axes4为显示图片窗口，reset即清除
-%清除设置到的静态文本
-set(handles.text3,'String','');
-% 重置清空动态txt的文字
-%set(handles.axes1,'title','');  %handles.edit1为要清除文字的文本框（双击文本框可以看见tag）
-%清除完需要吧图片的内存也清理掉(注:这个功能待定,也许不需要清除)
-handles=rmfield(handles,'I');
-guidata(hObject,handles);
+try  
+    %清除视图图片
+    cla(handles.axes1,'reset');  %handles.axes1为显示图片窗口，reset即清除
+    cla(handles.axes2,'reset');  %handles.axes2为显示图片窗口，reset即清除
+    cla(handles.axes3,'reset');  %handles.axes3为显示图片窗口，reset即清除
+    cla(handles.axes4,'reset');  %handles.axes4为显示图片窗口，reset即清除
+    %清除设置到的静态文本
+    set(handles.text3,'String','');
+    % 重置清空动态txt的文字
+    %set(handles.axes1,'title','');  %handles.edit1为要清除文字的文本框（双击文本框可以看见tag）
+    %清除完需要吧图片的内存也清理掉(注:这个功能待定,也许不需要清除)
+    handles=rmfield(handles,'I');
+    guidata(hObject,handles);
+catch
+end
 
 % --------------------------------------------------------------------
 function Close_Callback(hObject, eventdata, handles)
@@ -690,20 +695,6 @@ imshow(blurred);title('由运动形成模糊图像');%显示模糊图像
 axes(handles.axes3);
 imshow(wnrl);title('维纳滤波复原图像');%显示复原图像
 
-
-% --- Executes on button press in pushbutton12.
-function pushbutton12_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton12 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-I=handles.I;
-I=rgb2gray(I);
-BW5=edge(I,'canny');%进行canny算子边缘检测，门限值采用默认值
-axes(handles.axes2);    %显示在axes2框中
-imshow(BW5,[]);title('canny算子');
-
-
-
 % --- Executes on button press in pushbutton13.
 function pushbutton13_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton13 (see GCBO)
@@ -1090,7 +1081,6 @@ function Untitled_9_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.uipanel1,'Visible','on');
-set(handles.uipanel2,'Visible','off');
 set(handles.uipanel3,'Visible','off');
 set(handles.uipanel4,'Visible','off');
 set(handles.uipanel5,'Visible','off');
@@ -2248,57 +2238,44 @@ function pushbutton56_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton56 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-%基于控制标记符的分水岭分割
-[file,filepath]=uigetfile('*');
-file=fullfile(filepath,file);
-img=imread(file);%读图
-imgsize=size(img);
-if(numel(imgsize)>2)
-    i=rgb2gray(img);
-else
-    i=img;
-end;
-imshow(i);title('灰度图');
-pause;
-%取阈值
-[T,SM]=graythresh(i);
-bw=im2bw(i,T);
-imshow(bw);title('二值');
-pause;
-% % %%%%%%%%%%%%%%%%%%%%%%%%%%基于距离变换的分水岭分割%%%%%%%%%%%%%%%%%%%%%%
-gc = ~bw;
-% imshow(gc);
-% pause;
-D = bwdist(gc);
-% figure,contour(-D,40);
-imshow(-D,[]);title('距离变换图');
-pause;
-rm = imregionalmin(-D);%查看局部极小值区域
-imshow(rm);title('查看局部极小值区域');
-pause;
-im = imextendedmin(-D,2);%扩展最小值
-% figure,contour(im,40);
-fim=i;
-fim(im) = -255;
-imshow(fim);title('合并后的局部极小值');%查看合并后的局部极小值
-pause;
-Lim = watershed(bwdist(im));
-imshow(Lim,[]);title('基于距离变换的流域分割');
-pause;
-em = Lim == 0;
-res=em|im;
-imshow(res);%查看掩膜图像
-title('掩膜图像');
-pause;
-g2 = imimposemin(i, im | em);
-imshow(g2);
-title('强制最小');
-pause;
-L2 = watershed(g2);
-f2 = img;
-f2(L2 == 0) = 255;
-imshow(f2);
-title('基于控制标记符的分水岭分割');
+%改进的分水岭分割（之前的梯度图中有过多的局部极小点）
+I=handles.I;
+I=rgb2gray(I);
+axes(handles.axes2);
+imshow(I);title('灰度图像');
+%计算灰度图
+I=double(I);
+hv=fspecial('prewitt');
+hh=hv.';
+gv=abs(imfilter(I,hv,'replicate'));
+gh=abs(imfilter(I,hh,'replicate'));
+g=sqrt(gv.^2+gh.^2);
+%计算距离函数
+%subplot (232);
+df=bwdist(I) ;
+%imshow (uint8 (df*8)) ;
+%计算外部约束
+L=watershed(df) ;
+em=L==0;
+%subplot(233);
+%imshow(em);
+%计算内部约束
+im=imextendedmax(I,20);
+%subplot(234);
+%imshow (im);%重构梯度图
+g2= imimposemin(g,im|em);
+%subplot(235);
+%imshow(g2);
+%watershed算法分割
+L2=watershed(g2);
+wr2=L2==0;
+%subplot(236);
+I(wr2)=255;
+axes(handles.axes3);
+imshow(uint8(I));title('分割结果');
+
+
+
 
 
 % --- Executes on button press in pushbutton57.
@@ -2307,45 +2284,37 @@ function pushbutton57_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
-%I=rgb2gray(I);
-axes(handles.axes2);imshow(I);title('原始图像');
-I=double(I); %转换为灰度值是0-1的双精度
-[M,N]=size(I); %得到原图像的行列数
-[y,x]=getpts; %获得区域生长起始点
-x1=round(x); %横坐标取整
-y1=round(y); %纵坐标取整
-seed=I(x1,y1); %将生长起始点灰度值存入seed中
-Y=zeros(M,N);  %作一个全零与原图像等大的图像矩阵Y，作为输出图像矩阵
-Y(x1,y1)=1; %将Y中与所取点相对应位置的点设置为白点
-sum=seed;  %储存符合区域生长条件的点的灰度值的总和
-suit=1; %储存符合区域生长条件的点的总个数
-count=1; %每次判断一点周围八点符合条件的新点的数目
-threshold=10; %域值，即某一点与周围八点的绝对差值要小于阈值
-while count>0  %判断是否有新的符合生长条件的点，若没有，则结束
-    s=0; %判断一点周围八点时，符合条件的新点的灰度值之和
-    count=0;
-    for i=1:M
-        for j=1:N
-            if Y(i,j)==1
-                if (i-1)>0 && (i+1)<(M+1) && (j-1)>0 && (j+1)<(N+1) %判断此点是否为图像边界上的点
-                    for u= -1:1%判断点周围八点是否符合域值条件
-                        for v= -1:1  %u,v为偏移量
-                            if Y(i+u,j+v)==0 && abs(I(i+u,j+v)-seed)<=threshold%判断是否未存在于输出矩阵Y，并且为符合域值条件的点
-                                Y(i+u,j+v)=1; %符合以上两条件即将其在Y中与之位置对应的点设置为白点
-                                count=count+1; %新的、符合生长条件的点的总个数
-                                s=s+I(i+u,j+v); %新的、符合生长条件的点的总灰度数
-                            end
-                        end 
-                    end
-                end
-            end
-        end
+I=rgb2gray(I);
+%filenum=size(I,1);  
+%for i=1:filenum   
+ %   im=imread(strcat(DIR,sprintf('%d',i),'.jpg'));   
+ %   b=im;
+ %   [x,y,z]=size(im);
+ %   if y>x
+%        b(x+1:y,:)=255;
+%    else
+%        b(:,y+1:x)=255;
+%    end
+%end
+%axes(handles.axes4);
+%imshow(b)
+%title('四叉树分解');
+S=qtdecomp(I,.27);
+blocks = repmat (uint8(0),size(S));
+for dim=[512 256 128 64 32 16 8 4 2 1 ];
+    numblocks = length(find(S==dim));
+    if (numblocks >0)
+        values=repmat(uint8(1),[dim dim numblocks]);
+        values(2:dim,2:dim,:)=0;
+        blocks=qtsetblk(blocks,S,dim,values);
     end
-    suit=suit+count; %目前区域所有符合生长条件的点的总个数
-    sum=sum+s;  %目前区域所有符合生长条件的点的总灰度值
-    seed=sum/suit; %计算新的灰度平均值
 end
-axes(handles.axes3);imshow(Y);title('分割后图像');
+blocks(end,1:end)=1;
+blocks(1:end,end)=1;
+axes(handles.axes2);imshow(I),title('灰度图像'); 
+axes(handles.axes3);
+imshow(blocks,[])
+title('四叉树分解');
 
 
 % --- Executes on button press in pushbutton58.
@@ -2367,7 +2336,6 @@ function pushbutton60_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton60 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 f = handles.I;
 f_gray = rgb2gray(f);
 f_h = imhist(f_gray);
@@ -2502,3 +2470,56 @@ axes(handles.axes3);
 imshow(Blurred);title('模糊后的图像');
 axes(handles.axes4);
 imshow(J);title('初步恢复后的图像');
+
+
+% --- Executes on selection change in popupmenu13.
+function popupmenu13_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu13 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+I=rgb2gray(I);
+axes(handles.axes2);    %显示在axes2框中
+imshow(I);title('灰度图像');
+switch get(hObject,'value')
+    case 1
+    case 2
+        BW5=edge(I,'sobel');%进行canny算子边缘检测，门限值采用默认值
+        axes(handles.axes3);    %显示在axes2框中
+        imshow(BW5,[]);title('Sobel算子');
+    case 3
+        BW5=edge(I,'roberts');%进行canny算子边缘检测，门限值采用默认值
+        axes(handles.axes3);    %显示在axes2框中
+        imshow(BW5,[]);title('Roberts算子');
+    case 4
+        BW5=edge(I,'prewitt');%进行canny算子边缘检测，门限值采用默认值
+        axes(handles.axes3);    %显示在axes2框中
+        imshow(BW5,[]);title('Prewitt算子');
+    case 5
+        BW5=edge(I,'log');%进行canny算子边缘检测，门限值采用默认值
+        axes(handles.axes3);    %显示在axes2框中
+        imshow(BW5,[]);title('LOG算子');
+    case 6
+        BW5=edge(I,'canny');%进行canny算子边缘检测，门限值采用默认值
+        axes(handles.axes3);    %显示在axes2框中
+        imshow(BW5,[]);title('Canny算子');
+    case 7
+        BW5=edge(I,'zerocross');%进行canny算子边缘检测，门限值采用默认值
+        axes(handles.axes3);    %显示在axes2框中
+        imshow(BW5,[]);title('Zerocross算子');
+end
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu13 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu13
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu13_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu13 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
