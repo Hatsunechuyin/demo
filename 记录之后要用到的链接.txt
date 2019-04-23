@@ -2,6 +2,11 @@
 
 整体的毕设流程：https://github.com/Hatsunechuyin/demo.git
 				https://wenku.baidu.com/view/ddd23318a2161479171128f3.html
+				https://www.docin.com/p-1985520811.html
+				https://www.docin.com/p-705535263.html?docfrom=rrela
+				https://www.docin.com/p-1298702920.html
+				
+				这人的博客：https://blog.csdn.net/zhoufan900428/article/details/12883693
 
 毕业设计结构目录
 1、-------
@@ -16,7 +21,8 @@
 		2.2.1频域变换
 			2.1	傅立叶变换
 			2.2	哈达玛-沃尔什变换变换	
-			2.3	离散余弦变换	
+			2.3	离散余弦变换
+				https://blog.csdn.net/l641208111/article/details/84550952			
 		2.2.2小波变换
 			2.1压缩
 			https://blog.csdn.net/ebowtang/article/details/50477720
@@ -39,10 +45,13 @@
 			其他锐化算子
 			拉普拉斯算子
 	4.5	频率域图像增强	
+	https://blog.csdn.net/u012679707/article/details/78236474
 5.复原
+https://max.book118.com/html/2017/0628/118727842.shtm
 	1逆滤波复原法（一般不考虑噪声） 
 	2维纳滤波 
 	3约束最小二乘法
+	https://blog.csdn.net/yi_tech_blog/article/details/54605146
 6.分割
 	https://blog.csdn.net/KYJL888/article/details/78253734	
 	https://blog.csdn.net/qq_28942201/article/details/79376188
@@ -142,6 +151,7 @@ xlabel,ylabel,text,legend等中此用法类似
 图像复原：https://blog.csdn.net/fly_egg/article/details/60764374
 		  https://blog.csdn.net/weixin_39569242/article/details/81156482
 		  https://blog.csdn.net/u014722627/article/details/79817074
+		  https://max.book118.com/html/2017/0628/118727842.shtm
 		  （下面这两个整合在一起）
 		  直接逆滤波：https://blog.csdn.net/yi_tech_blog/article/details/53954025
 					  https://blog.csdn.net/weixin_41730407/article/details/80455612

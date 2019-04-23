@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 23-Apr-2019 11:14:28
+% Last Modified by GUIDE v2.5 23-Apr-2019 14:37:41
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1571,9 +1571,12 @@ function pushbutton35_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton35 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-image_o=handles.I;
-axes(handles.axes2);
-imshow(image_o);title('退化图像');
+%先生成噪声图片，之后再用各种来恢复
+image_o=imread('C:\Users\Administrator.SC-201902211420\Desktop\1858370454.png');
+image_o=rgb2gray(image_o);
+subplot(1,3,1);
+imshow(image_o);
+title('原图像');
 %频率域退化图像，退化函数H(u,v)=exp(-0.0025*( (u-M/2).^2+(v-N/2).^2).^(5/6) )
 %傅里叶变换
 f=im2double(image_o);
@@ -1582,30 +1585,29 @@ F=fftshift(F);
 %执行退化
 [M,N]=size(F);
 [u,v]=meshgrid(1:M,1:N);%生成二维坐标系
-H=-exp(0.0025.*((u-M./2).^2+(v-N./2).^2).^(5./6));
-[m,n]=size(H);
-disp(m);
-disp(n);
-disp(M);
-disp(N);
-F=F*H';
+H=exp(-0.0025* ( (u-M/2).^2+(v-N/2).^2).^(5/6) );
+F=F.*H;
 %傅里叶反变换
 X=ifftshift(F);
 x=ifft2(X);
 x=uint8(abs(x)*256);
-axes(handles.axes3);
-imshow(F);title('退化图像');
-%image_d=imread('C:\Program Files\MATLAB\R2013a\bin\work\图像复原\lena_deterioration.bmp');
-image_d=x;
+subplot(1,3,2);
+imshow(x);
+%
+title('退化图像');
+
+image_d=imread('C:\Program Files\MATLAB\R2013a\bin\work\图像复原\lena_deterioration.bmp');
 %直接逆滤波图像复原
+
 ff=im2double(image_d);%将图像灰度值归一化到0-1之间
+
 % 傅里叶变换
 f_Id=fft2(ff);
 f_Id=fftshift(f_Id);
 fH_Id=f_Id;
 [M,N]=size(fH_Id);
 % 逆滤波
-threshold=10;
+threshold=78;
 if threshold>M/2
         %全滤波
         fH_Id=fH_Id./(H+eps);
@@ -1619,12 +1621,14 @@ else
             end
         end
 end
+
 % 执行傅立叶逆变换
 fH_Id1=ifftshift(fH_Id);
 f_new=ifft2(fH_Id1);
 f_new=uint8(abs(f_new)*255);
-axes(handles.axes4);
-imshow(f_new);title('滤波半径=78的逆滤波复原图像');
+subplot(1,3,3);
+imshow(f_new);
+title('滤波半径=78的逆滤波复原图像');
 
 
 
@@ -2376,23 +2380,125 @@ end
 ind = ind/(k-1);
 f_bw = im2bw(f_gray,ind);
 imshow(f_bw);
-function entropy = entropy_sum(img, T)
-    [M, N] = size(img);
-    img_h = imhist(img);
-    k = length(img_h);
-    P0 = sum(img_h(1:T))/(M*N);
-    P1 = 1 - P0;
-    img_h = img_h/(M*N);
-    H0 = 0;
-    H1 = 0;
-    for i = 1:T
-        Z = img_h(i)/P0;
-        H0 = H0 - Z*log2(Z);
-    end
+%function entropy = entropy_sum(img, T)
+%    [M, N] = size(img);
+ %   img_h = imhist(img);
+%    k = length(img_h);
+%    P0 = sum(img_h(1:T))/(M*N);
+%    P1 = 1 - P0;
+ %   img_h = img_h/(M*N);
+ %   H0 = 0;
+ %   H1 = 0;
+  %  for i = 1:T
+   %     Z = img_h(i)/P0;
+   %     H0 = H0 - Z*log2(Z);
+   % end
 
-    for j = T+1: k
-         Z = img_h(j)/P1;
-         H1 = H1 - Z*log2(Z);
-    end
-    entropy = H0 + H1;
-end
+   % for j = T+1: k
+    %     Z = img_h(j)/P1;
+    %     H1 = H1 - Z*log2(Z);
+   % end
+   % entropy = H0 + H1;
+%end
+
+
+% --- Executes on button press in pushbutton61.
+function pushbutton61_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton61 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+I=rgb2gray(I);
+PSF=fspecial('gaussian',10,4);
+Blurred=imfilter(I,PSF,'conv');
+V=0.3;
+BN=imnoise(Blurred,'gaussian',0,V);
+NP=V*prod(size(I));
+%NP=V*numel(I);
+[reg,LAGRA]=deconvreg(BN,PSF,NP);
+Edged=edgetaper(BN,PSF);
+reg2=deconvreg(Edged,PSF,NP/1.2);
+reg3=deconvreg(Edged,PSF,[],LAGRA);
+axes(handles.axes2);
+imshow(BN);title('加入高斯噪声的图像');
+axes(handles.axes3);
+imshow(reg2);title('恢复后的图像');
+axes(handles.axes4);
+imshow(reg2);title('恢复后的图像');
+
+
+% --- Executes on button press in pushbutton62.
+function pushbutton62_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton62 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+I=rgb2gray(I);
+I = im2double(I);
+[hei,wid,~] = size(I);
+axes(handles.axes2);
+imshow(I);title('灰度图像');
+%subplot(2,2,1),imshow(I);
+%title('原图像');
+% 模拟运动模糊.
+LEN = 21;
+THETA = 11;
+PSF = fspecial('motion', LEN, THETA);%产生运动模糊算子，即点扩展函数
+blurred = imfilter(I, PSF, 'conv', 'circular');
+%subplot(2,2,2), imshow(blurred); title('模糊图像');
+Pf = psf2otf(PSF,[hei,wid]);%退化函数的FFT
+% 添加加性噪声
+noise_mean = 0;
+noise_var = 0.00001;
+blurred_noisy = imnoise(blurred, 'gaussian',noise_mean, noise_var);
+axes(handles.axes3);
+imshow(blurred_noisy);title('带运动模糊和噪声图像');
+p = [0 -1 0;-1 4 -1;0 -1 0];%拉普拉斯模板
+P = psf2otf(p,[hei,wid]);
+gama = 0.001;
+If = fft2(blurred_noisy);
+numerator = conj(Pf);%conj函数，用于求一个复数的复共轭
+denominator = Pf.^2 + gama*(P.^2);
+deblurred2 = ifft2( numerator.*If./ denominator );%约束最小二乘方滤波在频率域中的表达式
+axes(handles.axes4);
+imshow(deblurred2);title('约束最小二乘方滤波后图像');
+
+
+% --- Executes on button press in pushbutton63.
+function pushbutton63_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton63 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+I=rgb2gray(I);
+PSF=fspecial('gaussian',5,5);
+Blurred=imfilter(I,PSF,'symmetric','conv');
+V=0.003;
+BN=imnoise(Blurred,'gaussian',0,V);
+luc=deconvlucy(BN,PSF,5);
+axes(handles.axes2);
+imshow(Blurred);title('模糊后的图像')
+axes(handles.axes3);
+imshow(BN);title('加噪后的图像')
+axes(handles.axes4);
+imshow(luc);title('恢复后的图像')
+
+
+
+% --- Executes on button press in pushbutton64.
+function pushbutton64_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton64 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+I=rgb2gray(I);
+PSF=fspecial('motion',10,30);
+Blurred=imfilter(I,PSF,'circ','conv');
+INITPSF=ones(size(PSF));
+[J,P]=deconvblind(Blurred,INITPSF,20);
+axes(handles.axes2);
+imshow(I);title('灰度图像');
+axes(handles.axes3);
+imshow(Blurred);title('模糊后的图像');
+axes(handles.axes4);
+imshow(J);title('初步恢复后的图像');
