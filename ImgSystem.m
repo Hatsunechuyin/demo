@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 22-Apr-2019 20:31:04
+% Last Modified by GUIDE v2.5 23-Apr-2019 11:14:28
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -151,11 +151,11 @@ function Untitled_2_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %设置uipanel1的
 set(handles.uipanel1,'Visible','on');
-set(handles.uipanel2,'Visible','off');
 set(handles.uipanel3,'Visible','off');
 set(handles.uipanel4,'Visible','off');
 set(handles.uipanel5,'Visible','off');
 set(handles.uipanel6,'Visible','off');
+set(handles.uipanel18,'Visible','off');
 
 
 % --------------------------------------------------------------------
@@ -164,11 +164,11 @@ function Untitled_3_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.uipanel1,'Visible','off');
-set(handles.uipanel2,'Visible','on');
 set(handles.uipanel3,'Visible','off');
 set(handles.uipanel4,'Visible','off');
 set(handles.uipanel5,'Visible','off');
 set(handles.uipanel6,'Visible','off');
+set(handles.uipanel18,'Visible','off');
 
 % --------------------------------------------------------------------
 function Untitled_4_Callback(hObject, eventdata, handles)
@@ -176,11 +176,11 @@ function Untitled_4_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.uipanel1,'Visible','off');
-set(handles.uipanel2,'Visible','off');
 set(handles.uipanel3,'Visible','on');
 set(handles.uipanel4,'Visible','off');
 set(handles.uipanel5,'Visible','off');
 set(handles.uipanel6,'Visible','off');
+set(handles.uipanel18,'Visible','off');
 
 % --------------------------------------------------------------------
 function Untitled_5_Callback(hObject, eventdata, handles)
@@ -188,7 +188,6 @@ function Untitled_5_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.uipanel1,'Visible','off');
-set(handles.uipanel2,'Visible','off');
 set(handles.uipanel3,'Visible','off');
 set(handles.uipanel4,'Visible','on');
 set(handles.uipanel5,'Visible','off');
@@ -202,7 +201,6 @@ function Untitled_6_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.uipanel1,'Visible','off');
-set(handles.uipanel2,'Visible','off');
 set(handles.uipanel3,'Visible','off');
 set(handles.uipanel4,'Visible','off');
 set(handles.uipanel5,'Visible','on');
@@ -215,7 +213,6 @@ function Untitled_7_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.uipanel1,'Visible','off');
-set(handles.uipanel2,'Visible','off');
 set(handles.uipanel3,'Visible','off');
 set(handles.uipanel4,'Visible','off');
 set(handles.uipanel5,'Visible','off');
@@ -236,7 +233,6 @@ function Untitled_8_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 set(handles.uipanel1,'Visible','off');
-set(handles.uipanel2,'Visible','off');
 set(handles.uipanel3,'Visible','off');
 set(handles.uipanel4,'Visible','off');
 set(handles.uipanel5,'Visible','off');
@@ -922,7 +918,43 @@ function pushbutton19_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton19 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+f=handles.I;
+f=rgb2gray(f);%转换为灰度图像
+f=im2double(f);%数据类型转换
+%全剧阈值
+T=0.5*(min(f(:))+max(f(:)));
+done=false;
+while ~done
+	g=f>=T;
+	Tn=0.5*(mean(f(g))+mean(f(~g)));
+	done = abs(T-Tn)<0.1;
+	T=Tn;
+end
+display('Threshold(T)-Iterative');%显示文字
+r=im2bw(f,T);
+%subplot(221);imshow(f);
+axes(handles.axes2);
+imhist(f);
+xlabel('(a)灰度图像的直方图');
+axes(handles.axes3);
+imshow(r);
+%subplot(222);imshow(r);
+title('(b)迭代法全局阈值分割');
+Th=graythresh(f);%阈值
+display('Global Thresholding- Otsu''s Method');
+s=im2bw(f,Th);
+axes(handles.axes4);
+imshow(s);
+title('(c)全局阈值Otsu法阈值分割');
+%subplot(223);imshow(s);
+%xlabel('(c)全局阈值Otsu法阈值分割');
+%se=strel('disk',10);
+%ft=imtophat(f,se);
+%Thr=graythresh(ft);
+%display('Threshold(T) -Local Thresholding');
+%lt = im2bw(ft,Thr);
+%subplot(224);imshow(lt);
+%xlabel('(d)局部阈值分割');
 
 
 function edit4_Callback(hObject, eventdata, handles)
@@ -2205,3 +2237,162 @@ function pushbutton55_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to pushbutton55 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on button press in pushbutton56.
+function pushbutton56_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton56 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+%基于控制标记符的分水岭分割
+[file,filepath]=uigetfile('*');
+file=fullfile(filepath,file);
+img=imread(file);%读图
+imgsize=size(img);
+if(numel(imgsize)>2)
+    i=rgb2gray(img);
+else
+    i=img;
+end;
+imshow(i);title('灰度图');
+pause;
+%取阈值
+[T,SM]=graythresh(i);
+bw=im2bw(i,T);
+imshow(bw);title('二值');
+pause;
+% % %%%%%%%%%%%%%%%%%%%%%%%%%%基于距离变换的分水岭分割%%%%%%%%%%%%%%%%%%%%%%
+gc = ~bw;
+% imshow(gc);
+% pause;
+D = bwdist(gc);
+% figure,contour(-D,40);
+imshow(-D,[]);title('距离变换图');
+pause;
+rm = imregionalmin(-D);%查看局部极小值区域
+imshow(rm);title('查看局部极小值区域');
+pause;
+im = imextendedmin(-D,2);%扩展最小值
+% figure,contour(im,40);
+fim=i;
+fim(im) = -255;
+imshow(fim);title('合并后的局部极小值');%查看合并后的局部极小值
+pause;
+Lim = watershed(bwdist(im));
+imshow(Lim,[]);title('基于距离变换的流域分割');
+pause;
+em = Lim == 0;
+res=em|im;
+imshow(res);%查看掩膜图像
+title('掩膜图像');
+pause;
+g2 = imimposemin(i, im | em);
+imshow(g2);
+title('强制最小');
+pause;
+L2 = watershed(g2);
+f2 = img;
+f2(L2 == 0) = 255;
+imshow(f2);
+title('基于控制标记符的分水岭分割');
+
+
+% --- Executes on button press in pushbutton57.
+function pushbutton57_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton57 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+%I=rgb2gray(I);
+axes(handles.axes2);imshow(I);title('原始图像');
+I=double(I); %转换为灰度值是0-1的双精度
+[M,N]=size(I); %得到原图像的行列数
+[y,x]=getpts; %获得区域生长起始点
+x1=round(x); %横坐标取整
+y1=round(y); %纵坐标取整
+seed=I(x1,y1); %将生长起始点灰度值存入seed中
+Y=zeros(M,N);  %作一个全零与原图像等大的图像矩阵Y，作为输出图像矩阵
+Y(x1,y1)=1; %将Y中与所取点相对应位置的点设置为白点
+sum=seed;  %储存符合区域生长条件的点的灰度值的总和
+suit=1; %储存符合区域生长条件的点的总个数
+count=1; %每次判断一点周围八点符合条件的新点的数目
+threshold=10; %域值，即某一点与周围八点的绝对差值要小于阈值
+while count>0  %判断是否有新的符合生长条件的点，若没有，则结束
+    s=0; %判断一点周围八点时，符合条件的新点的灰度值之和
+    count=0;
+    for i=1:M
+        for j=1:N
+            if Y(i,j)==1
+                if (i-1)>0 && (i+1)<(M+1) && (j-1)>0 && (j+1)<(N+1) %判断此点是否为图像边界上的点
+                    for u= -1:1%判断点周围八点是否符合域值条件
+                        for v= -1:1  %u,v为偏移量
+                            if Y(i+u,j+v)==0 && abs(I(i+u,j+v)-seed)<=threshold%判断是否未存在于输出矩阵Y，并且为符合域值条件的点
+                                Y(i+u,j+v)=1; %符合以上两条件即将其在Y中与之位置对应的点设置为白点
+                                count=count+1; %新的、符合生长条件的点的总个数
+                                s=s+I(i+u,j+v); %新的、符合生长条件的点的总灰度数
+                            end
+                        end 
+                    end
+                end
+            end
+        end
+    end
+    suit=suit+count; %目前区域所有符合生长条件的点的总个数
+    sum=sum+s;  %目前区域所有符合生长条件的点的总灰度值
+    seed=sum/suit; %计算新的灰度平均值
+end
+axes(handles.axes3);imshow(Y);title('分割后图像');
+
+
+% --- Executes on button press in pushbutton58.
+function pushbutton58_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton58 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton59.
+function pushbutton59_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton59 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton60.
+function pushbutton60_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton60 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+f = handles.I;
+f_gray = rgb2gray(f);
+f_h = imhist(f_gray);
+k = length(f_h);
+entropy_list = [];
+for T = 1: k
+    entropy_list(T) = entropy_sum(f_gray,T);
+end
+[max_entropy_sum, ind] = max(entropy_list);
+ind = ind/(k-1);
+f_bw = im2bw(f_gray,ind);
+imshow(f_bw);
+function entropy = entropy_sum(img, T)
+    [M, N] = size(img);
+    img_h = imhist(img);
+    k = length(img_h);
+    P0 = sum(img_h(1:T))/(M*N);
+    P1 = 1 - P0;
+    img_h = img_h/(M*N);
+    H0 = 0;
+    H1 = 0;
+    for i = 1:T
+        Z = img_h(i)/P0;
+        H0 = H0 - Z*log2(Z);
+    end
+
+    for j = T+1: k
+         Z = img_h(j)/P1;
+         H1 = H1 - Z*log2(Z);
+    end
+    entropy = H0 + H1;
+end

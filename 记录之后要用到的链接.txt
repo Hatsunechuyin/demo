@@ -27,6 +27,7 @@
 	哈夫曼编码：https://blog.csdn.net/tengweitw/article/details/45478497
 				https://blog.csdn.net/gaussrieman123/article/details/68060207
 				http://www.doc88.com/p-7864984101090.html
+				https://www.ilovematlab.cn/thread-12813-1-1.htm
 	预测编码：https://blog.csdn.net/dai_wen/article/details/78891644
 	3.1.
 4.增强
@@ -43,8 +44,12 @@
 	2维纳滤波 
 	3约束最小二乘法
 6.分割
-https://blog.csdn.net/KYJL888/article/details/78253734	
-https://blog.csdn.net/qq_28942201/article/details/79376188
+	https://blog.csdn.net/KYJL888/article/details/78253734	
+	https://blog.csdn.net/qq_28942201/article/details/79376188
+	https://blog.csdn.net/bentleydelll/article/details/82456150
+	https://blog.csdn.net/weixin_43418716/article/details/83629009
+	https://blog.csdn.net/m0_37565736/article/details/79840487#%E4%BA%8C%E5%9F%BA%E4%BA%8E%E5%8C%BA%E5%9F%9F%E7%9A%84%E5%9B%BE%E5%83%8F%E5%88%86%E5%89%B2
+	http://www.elecfans.com/rengongzhineng/605584_2.html
 
 
 为方便叙述设第一个GUI文件名为GUI_1，第二个GUI文件名为GUI_2
