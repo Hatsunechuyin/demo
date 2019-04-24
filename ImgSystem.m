@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 23-Apr-2019 21:38:57
+% Last Modified by GUIDE v2.5 24-Apr-2019 22:27:25
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -2285,6 +2285,30 @@ function pushbutton57_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
 I=rgb2gray(I);
+axes(handles.axes2);
+imshow(I);
+title('灰度图像');
+I=double(I) ;%计算距离函数
+hv=fspecial('prewitt');
+hh=hv.';
+gv=abs(imfilter(I,hv,'replicate'));
+gh=abs(imfilter(I,hh,'replicate'));
+g=sqrt(gv.^2+gh.^2);
+%watershed算法分割
+L=watershed(g);
+wr=L==0;
+axes(handles.axes3)
+imshow(wr) ;
+title('分水岭');
+I(wr)=255;
+axes(handles.axes4)
+imshow(uint8(I));
+title('分割结果');%取出梯度图中局部极小值点
+
+
+
+%I=handles.I;
+%I=rgb2gray(I);
 %filenum=size(I,1);  
 %for i=1:filenum   
  %   im=imread(strcat(DIR,sprintf('%d',i),'.jpg'));   
@@ -2299,22 +2323,22 @@ I=rgb2gray(I);
 %axes(handles.axes4);
 %imshow(b)
 %title('四叉树分解');
-S=qtdecomp(I,.27);
-blocks = repmat (uint8(0),size(S));
-for dim=[512 256 128 64 32 16 8 4 2 1 ];
-    numblocks = length(find(S==dim));
-    if (numblocks >0)
-        values=repmat(uint8(1),[dim dim numblocks]);
-        values(2:dim,2:dim,:)=0;
-        blocks=qtsetblk(blocks,S,dim,values);
-    end
-end
-blocks(end,1:end)=1;
-blocks(1:end,end)=1;
-axes(handles.axes2);imshow(I),title('灰度图像'); 
-axes(handles.axes3);
-imshow(blocks,[])
-title('四叉树分解');
+%S=qtdecomp(I,.27);
+%blocks = repmat (uint8(0),size(S));
+%for dim=[512 256 128 64 32 16 8 4 2 1 ];
+%    numblocks = length(find(S==dim));
+%    if (numblocks >0)
+%        values=repmat(uint8(1),[dim dim numblocks]);
+%        values(2:dim,2:dim,:)=0;
+%        blocks=qtsetblk(blocks,S,dim,values);
+%    end
+%end
+%blocks(end,1:end)=1;
+%blocks(1:end,end)=1;
+%axes(handles.axes2);imshow(I),title('灰度图像'); 
+%axes(handles.axes3);
+%imshow(blocks,[])
+%title('四叉树分解');
 
 
 % --- Executes on button press in pushbutton58.
@@ -2322,6 +2346,36 @@ function pushbutton58_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton58 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+I=rgb2gray(I);
+axes(handles.axes2)
+imshow(I);
+title('灰度图像');
+%axis([50,250,50,200]);grid on; %显示网格线axis on; %显示坐标系
+[m,n]=size(I); %测量图像尺寸参数
+GP=zeros(1,256); %预创建存放灰度出现概率的向量
+for k=0:255
+    GP(k+1)=length(find(I==k))/(m*n); %计算位置
+end
+axes(handles.axes2);
+bar(0:255,GP,'g') %绘制直方图
+title('灰度直方图');
+xlabel('灰度值');
+ylabel('出现概率');
+I2=im2bw(I,85/255);
+axes(handles.axes3);
+imshow(I2);
+title('阈值85的分割图像')
+%axis([50,250,50,200]);
+grid on; %显示网格线
+axis on, %显示坐标系
+I3=im2bw(I,120/255);
+axes(handles.axes4);
+imshow(I3);
+title('阈值120的分割图像');
+%axis([50,250,50,200]);
+grid on; %显示网格线
+axis on; %显示坐标系仿直效果如阁
 
 
 % --- Executes on button press in pushbutton59.
@@ -2523,3 +2577,29 @@ function popupmenu13_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in pushbutton65.
+function pushbutton65_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton65 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+I=rgb2gray(I);
+I=im2double(I);
+T0=0.01;  %参数TO
+T1=(min(I(:))+max(I(:)))/2;
+r1=find(I>T1) ;
+r2=find(I<=T1) ;
+T2= (mean(I(r1))+mean(I(r2)))/2;
+while abs(T2-T1)<T0  %迭代求阈值
+      T1=T2;
+      r1=find(I>T1);
+      r2=find(I<=T1) ;
+      T2=(mean(I(r1))+mean(I(r2)))/2;
+end
+J=im2bw(I,T2) ;  %图像分割
+axes(handles.axes2);
+imshow(I);title('灰度图像');
+axes(handles.axes3);
+imshow(J);title('迭代法求阈值分割图像');

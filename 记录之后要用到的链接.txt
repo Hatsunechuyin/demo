@@ -63,6 +63,8 @@ https://jingyan.baidu.com/article/93f9803f5eeca8e0e46f553d.html
 	https://blog.csdn.net/weixin_43418716/article/details/83629009
 	https://blog.csdn.net/m0_37565736/article/details/79840487#%E4%BA%8C%E5%9F%BA%E4%BA%8E%E5%8C%BA%E5%9F%9F%E7%9A%84%E5%9B%BE%E5%83%8F%E5%88%86%E5%89%B2
 	http://www.elecfans.com/rengongzhineng/605584_2.html
+	https://www.docin.com/p-1486480481.html
+	https://www.docin.com/p-818166342.html?docfrom=rrela   (用它的分析)
 	最小值：https://blog.csdn.net/u010839382/article/details/30799465
 	https://blog.csdn.net/whuhan2013/article/details/53977659
 	四叉树必须图像是2的整次幂
