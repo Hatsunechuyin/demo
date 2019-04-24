@@ -1,5 +1,8 @@
 //https://jingyan.baidu.com/article/359911f5a9e0bc57fe030617.html(matlab GUI怎么设计点击菜单项切换GUI界面？)
 
+论文参考：https://wenku.baidu.com/view/cfc8f2c0250c844769eae009581b6bd97f19bc90.html
+		  https://wenku.baidu.com/view/2cdcf668590216fc700abb68a98271fe910eafe1.html
+		  https://www.docin.com/p-1985520811.html
 整体的毕设流程：https://github.com/Hatsunechuyin/demo.git
 				https://wenku.baidu.com/view/ddd23318a2161479171128f3.html
 				https://www.docin.com/p-1985520811.html
@@ -48,6 +51,7 @@
 	https://blog.csdn.net/u012679707/article/details/78236474
 5.复原
 https://max.book118.com/html/2017/0628/118727842.shtm
+https://jingyan.baidu.com/article/93f9803f5eeca8e0e46f553d.html
 	1逆滤波复原法（一般不考虑噪声） 
 	2维纳滤波 
 	3约束最小二乘法
@@ -332,3 +336,9 @@ I = imread('C:\Users\Administrator.SC-201902211420\Desktop\1858370454.png');
  Ide = col2im(deco,[M,N],[M,N],'distinct'); %把向量重新转换成图像块；
  subplot(1,2,1);imshow(I);title('original image');
  subplot(1,2,2);imshow(uint8(Ide));title('deco image');
+ 
+ 
+ ==========================4.24====================================
+
+结构体内容引用自非结构体数组对象：http://tieba.baidu.com/p/3615007847
+图像复原PSF:https://zhidao.baidu.com/question/542203729.html
