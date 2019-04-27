@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 24-Apr-2019 22:27:25
+% Last Modified by GUIDE v2.5 27-Apr-2019 21:36:54
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -771,9 +771,10 @@ function pushbutton16_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 im_l=handles.I;
 im_l1=im2double(im_l);  
-im_l2=rgb2gray(im_l1);  
+im_l2=rgb2gray(im_l1);
+im_l2=imcrop(im_l2,[0,0,384,384]);
 %对图像进行哈达玛变换  
-H=hadamard(512);%产生512X512的Hadamard矩阵  
+H=hadamard(384);%产生384X384的Hadamard矩阵  
 haImg=H*im_l2*H;  
 haImg2=haImg/512;  
 %对图像进行哈达玛逆变换  
@@ -781,16 +782,16 @@ hhaImg=H'*haImg2*H';
 hhaImg2=hhaImg/512;  
 haImg1=im2uint8(haImg);  
 hhaImg1=im2uint8(hhaImg2);  
-subplot(2,2,1);  
-imshow(im_l);  
-title('原图');  
-subplot(2,2,2);  
+% subplot(2,2,1);  
+% imshow(im_l);  
+% title('原图');  
+axes(handles.axes2);
 imshow(im_l2);  
 title('灰度图');  
-subplot(2,2,3);  
+axes(handles.axes3);
 imshow(haImg2);  
 title('图像的二维离散Hadamard变换');  
-subplot(2,2,4);  
+axes(handles.axes4); 
 imshow(hhaImg1);  
 title('图像的二维离散Hadamard逆变换');  
 
@@ -1556,17 +1557,51 @@ function uipanel22_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 
+
 % --- Executes on button press in pushbutton35.
 function pushbutton35_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton35 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 %先生成噪声图片，之后再用各种来恢复
-image_o=imread('C:\Users\Administrator.SC-201902211420\Desktop\1858370454.png');
+% I=handles.I;
+% I=rgb2gray(I);
+% I=im2double(I);
+% axes(handles.axes1);
+% imshow(I,[]);
+% [m,n]=size(I);
+% m=2*m;n=2*n;
+% u=-m/2:m/2-1;
+% v=-n/2:n/2-1;
+% [U,V]=meshgrid(u,v);
+% D=sqrt(U.^2+V.^2);
+% D0=130;
+% H=exp(-(D.^2)./(2*(D0^2)));%系数
+% N=0.01*ones(size(I,1),size(I,2));
+% N=imnoise(I,'gaussian',0,0.001);
+% J=fftfilter(I,H)+N;
+% axes(handles.axes2);
+% imshow(J,[]);%
+% HC=zeros(m,n);
+% M1=H>0.1;
+% HC(M1)=1./H(M1);
+% K=fftfilter(J,HC);
+% M2=H>0.01;
+% HC(M2)=1./H(M2);
+% L=fftfilter(J,HC);
+% axes(handles.axes3);
+% imshow(K,[]);
+% axes(handles.axes4);
+% imshow(L,[]);
+% function Z=fftfilter(X,H)%输入的是大小跟系数
+% F=fft2(X,size(H,1),size(H,2));
+% Z=H.*F;
+% Z=ifftshift(Z);
+% Z=abs(ifft2(Z));
+% Z=Z(1:size(X,1),1:size(X,2));
+image_o = handles.I;
+image_o=imcrop(image_o,[0,0,384,448]);
 image_o=rgb2gray(image_o);
-subplot(1,3,1);
-imshow(image_o);
-title('原图像');
 %频率域退化图像，退化函数H(u,v)=exp(-0.0025*( (u-M/2).^2+(v-N/2).^2).^(5/6) )
 %傅里叶变换
 f=im2double(image_o);
@@ -1575,29 +1610,26 @@ F=fftshift(F);
 %执行退化
 [M,N]=size(F);
 [u,v]=meshgrid(1:M,1:N);%生成二维坐标系
-H=exp(-0.0025* ( (u-M/2).^2+(v-N/2).^2).^(5/6) );
+H=exp(-0.0025* ((u-M/2).^2+(v-N/2).^2).^(5/6) );
+whos('F')
+whos('H')
 F=F.*H;
 %傅里叶反变换
 X=ifftshift(F);
 x=ifft2(X);
 x=uint8(abs(x)*256);
-subplot(1,3,2);
+axes(handles.axes2)
 imshow(x);
-%
 title('退化图像');
-
-image_d=imread('C:\Program Files\MATLAB\R2013a\bin\work\图像复原\lena_deterioration.bmp');
-%直接逆滤波图像复原
-
-ff=im2double(image_d);%将图像灰度值归一化到0-1之间
-
+%ff=im2double(image_d);%将图像灰度值归一化到0-1之间
+ff=im2double(x);
 % 傅里叶变换
 f_Id=fft2(ff);
 f_Id=fftshift(f_Id);
 fH_Id=f_Id;
 [M,N]=size(fH_Id);
 % 逆滤波
-threshold=78;
+threshold=78;%滤波半径
 if threshold>M/2
         %全滤波
         fH_Id=fH_Id./(H+eps);
@@ -1611,15 +1643,14 @@ else
             end
         end
 end
-
 % 执行傅立叶逆变换
 fH_Id1=ifftshift(fH_Id);
 f_new=ifft2(fH_Id1);
 f_new=uint8(abs(f_new)*255);
-subplot(1,3,3);
+axes(handles.axes3)
+whos('f_new')
 imshow(f_new);
 title('滤波半径=78的逆滤波复原图像');
-
 
 
 % --- Executes on button press in pushbutton36.
@@ -2603,3 +2634,34 @@ axes(handles.axes2);
 imshow(I);title('灰度图像');
 axes(handles.axes3);
 imshow(J);title('迭代法求阈值分割图像');
+
+
+% --- Executes on button press in pushbutton66.
+function pushbutton66_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton66 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+I=handles.I;
+I=rgb2gray(I);
+b=imcrop(I,[0,0,256,256]);%必须是2的阶层
+axes(handles.axes2);
+imshow (b,[]);
+title ('正方形灰度图')
+whos('b')
+S=qtdecomp(b,.27);
+blocks = repmat(uint8(0),size(S));
+for dim=[512 256 128 64 32 16 8 4 2 1];
+    numblocks = length(find(S==dim)) ;
+    if (numblocks > 0)
+        values = repmat (uint8(1), [dim dim numblocks]);
+        values(2:dim,2:dim,:) = 0;
+        blocks = qtsetblk(blocks,S,dim, values);
+    end
+end
+blocks(end,1:end) = 1;
+blocks(1:end,end) = 1;
+%subplot (121) ; 
+%imshow(I),xlabel(' (a)原始图像')
+axes(handles.axes3);
+imshow (blocks,[]);
+title ('四叉树分解')
