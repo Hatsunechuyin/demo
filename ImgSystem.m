@@ -656,24 +656,25 @@ function pushbutton9_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton9 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+%没用到的方法图像复原
 %try
-    if  isfield(handles,'I')%判断句柄中的变量是否存在
-        I=handles.I;      
-        RGB=rgb2gray(I);
-        RGB=im2double(RGB);
-        len=50;%设置参数
-        theta=20;
-        PSF=fspecial('motion',len,theta);%产生FSP
-        J=imfilter(RGB,PSF,'conv','circular');%运动模糊
-        axes(handles.axes2);
-        imshow(J);title('灰度退化图像图像');
-        nsr=0;
-        K=deconvwnr(J,PSF,nsr);%维纳滤波
-        axes(handles.axes3);
-        imshow(K);title('复原图像(维纳滤波)'); 
-    else
-        warndlg('请先打开需要操作的图片');
-    end
+%     if  isfield(handles,'I')%判断句柄中的变量是否存在
+%         I=handles.I;      
+%         RGB=rgb2gray(I);
+%         RGB=im2double(RGB);
+%         len=50;%设置参数
+%         theta=20;
+%         PSF=fspecial('motion',len,theta);%产生FSP
+%         J=imfilter(RGB,PSF,'conv','circular');%运动模糊
+%         axes(handles.axes2);
+%         imshow(J);title('灰度退化图像图像');
+%         nsr=0;
+%         K=deconvwnr(J,PSF,nsr);%维纳滤波
+%         axes(handles.axes3);
+%         imshow(K);title('复原图像(维纳滤波)'); 
+%     else
+%         warndlg('请先打开需要操作的图片');
+%     end
 %catch
 %end
 
@@ -2460,24 +2461,25 @@ function pushbutton61_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton61 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-I=handles.I;
-I=rgb2gray(I);
-PSF=fspecial('gaussian',10,4);
-Blurred=imfilter(I,PSF,'conv');
-V=0.3;
-BN=imnoise(Blurred,'gaussian',0,V);
-NP=V*prod(size(I));
-%NP=V*numel(I);
-[reg,LAGRA]=deconvreg(BN,PSF,NP);
-Edged=edgetaper(BN,PSF);
-reg2=deconvreg(Edged,PSF,NP/1.2);
-reg3=deconvreg(Edged,PSF,[],LAGRA);
-axes(handles.axes2);
-imshow(BN);title('加入高斯噪声的图像');
-axes(handles.axes3);
-imshow(reg2);title('恢复后的图像');
-axes(handles.axes4);
-imshow(reg2);title('恢复后的图像');
+%没用到的方法图像复原
+% I=handles.I;
+% I=rgb2gray(I);
+% PSF=fspecial('gaussian',10,4);
+% Blurred=imfilter(I,PSF,'conv');
+% V=0.3;
+% BN=imnoise(Blurred,'gaussian',0,V);
+% NP=V*prod(size(I));
+% %NP=V*numel(I);
+% [reg,LAGRA]=deconvreg(BN,PSF,NP);
+% Edged=edgetaper(BN,PSF);
+% reg2=deconvreg(Edged,PSF,NP/1.2);
+% reg3=deconvreg(Edged,PSF,[],LAGRA);
+% axes(handles.axes2);
+% imshow(BN);title('加入高斯噪声的图像');
+% axes(handles.axes3);
+% imshow(reg2);title('恢复后的图像');
+% axes(handles.axes4);
+% imshow(reg2);title('恢复后的图像');
 
 
 % --- Executes on button press in pushbutton62.
