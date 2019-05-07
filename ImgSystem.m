@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 27-Apr-2019 21:36:54
+% Last Modified by GUIDE v2.5 07-May-2019 11:27:36
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -153,12 +153,15 @@ function Untitled_2_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 %设置uipanel1的
-set(handles.uipanel1,'Visible','on');
-set(handles.uipanel3,'Visible','off');
-set(handles.uipanel4,'Visible','off');
-set(handles.uipanel5,'Visible','off');
-set(handles.uipanel6,'Visible','off');
-set(handles.uipanel18,'Visible','off');
+try 
+    set(handles.uipanel1,'Visible','on');
+    set(handles.uipanel3,'Visible','off');
+    set(handles.uipanel4,'Visible','off');
+    set(handles.uipanel5,'Visible','off');
+    set(handles.uipanel6,'Visible','off');
+    set(handles.uipanel18,'Visible','off');
+catch
+end
 
 
 % --------------------------------------------------------------------
@@ -166,12 +169,15 @@ function Untitled_3_Callback(hObject, eventdata, handles)
 % hObject    handle to Untitled_3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-set(handles.uipanel1,'Visible','off');
-set(handles.uipanel3,'Visible','off');
-set(handles.uipanel4,'Visible','off');
-set(handles.uipanel5,'Visible','off');
-set(handles.uipanel6,'Visible','off');
-set(handles.uipanel18,'Visible','off');
+try
+    set(handles.uipanel1,'Visible','off');
+    set(handles.uipanel3,'Visible','off');
+    set(handles.uipanel4,'Visible','off');
+    set(handles.uipanel5,'Visible','off');
+    set(handles.uipanel6,'Visible','off');
+    set(handles.uipanel18,'Visible','off');
+catch
+end
 
 % --------------------------------------------------------------------
 function Untitled_4_Callback(hObject, eventdata, handles)
@@ -491,6 +497,7 @@ function figure1_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
+
 %镜像的全局变量
 global v_image;
 v_image=1;
@@ -515,7 +522,13 @@ global lossyComCR;%压缩比
 lossyComCR=0;%对应第一个
 global lossyComTrans;
 lossyComTrans=1;
-
+disp('handles')
+% set(uipanel1,'Visible','on');
+% set(uipanel3,'Visible','off');
+% set(uipanel4,'Visible','off');
+% set(uipanel5,'Visible','off');
+% set(uipanel6,'Visible','off');
+% set(uipanel18,'Visible','off');
 
 
 
@@ -581,12 +594,13 @@ function pushbutton7_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton7 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+ cla(handles.axes2,'reset'); 
 %try
 %需要哈夫曼编码的源代码
     if  isfield(handles,'I')%判断句柄中的变量是否存在
         I=handles.I;      
         Gray=rgb2gray(I);%转化成灰度的图像
-        axes(handles.axes2);
+        axes(handles.axes3);
         imshow(Gray);title('灰度图像');
         [zipped,info]=huffencode(Gray);%调用哈夫曼编码程序进行压缩
         unzipped=huffdecode(zipped,info);%调用哈夫曼解码程序进行解码
@@ -594,8 +608,8 @@ function pushbutton7_Callback(hObject, eventdata, handles)
         CR=info.ratio;%disp(CR);%压缩比
         %H=info.h;disp(H);%信息熵
         %CE=info.ce;disp(CE);%编码效率
-        axes(handles.axes3);title('解码后的图像');
-        imshow(unzipped);
+        axes(handles.axes4);
+        imshow(unzipped);title('解码后的图像');
         %disp('平均码长');L=info.maxcodelen
         %disp('压缩比');CR=info.ratio
         set(handles.text34,'String',CR);
@@ -633,7 +647,9 @@ function pushbutton8_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 try
     if  isfield(handles,'I')%判断句柄中的变量是否存在
-        I=handles.I;      
+        I=handles.I;
+        axes(handles.axes1);
+        imshow(I);title('原图像');
         RGB=rgb2gray(I);
         %RGB=I;
         axes(handles.axes2);
@@ -1220,13 +1236,15 @@ function pushbutton24_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
 I1=rgb2gray(I);
-axes(handles.axes2);
-imhist(I1);
-I2=histeq(I1);
+axes(handles.axes1);
+imshow(I1);title('原图灰度图像');
 axes(handles.axes3);
-imshow(I2);
+imhist(I1);title('原图的直方图');
+I2=histeq(I1);
+axes(handles.axes2);
+imshow(I2);title('直方图均衡化')
 axes(handles.axes4);
-imhist(I2);
+imhist(I2);title('修改后的直方图');
 
 %I1=handles.I;
 %[M,N,G]=size(I1);
@@ -1326,13 +1344,15 @@ function pushbutton25_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
 I1=rgb2gray(I);
-axes(handles.axes2);
-imhist(I1);
-I2=imadjust(I1,[0.3 0.7],[0.1 0.9],1);
+axes(handles.axes1);
+imshow(I1);title('原图像的灰度图像');
 axes(handles.axes3);
-imshow(I2);
+imhist(I1);title('原图像的直方图');
+I2=imadjust(I1,[0.3 0.7],[0.1 0.9],1);
+axes(handles.axes2);
+imshow(I2);title('灰度变换');
 axes(handles.axes4);
-imhist(I2);
+imhist(I2);title('灰度变换的直方图');
 
 
 % --- Executes on button press in pushbutton26.
@@ -1394,14 +1414,14 @@ global bRadius;
 filter=get(handles.popupmenu5,'value');
 switch filter
     case 1
-        set(handles.popupmenu6,'string',{20,50,300});
+        set(handles.popupmenu6,'string',{2,8,16});
         str=get(handles.popupmenu6,'string');
         val=get(handles.popupmenu6,'value');
         %disp(str(val));
         bRadius=str2double(str(val));
         disp(bRadius);
     case 2
-        set(handles.popupmenu6,'string',{2,8,16});
+        set(handles.popupmenu6,'string',{4,10,60});
         str=get(handles.popupmenu6,'string');
         val=get(handles.popupmenu6,'value');
         bRadius=str2double(str(val));
@@ -1470,6 +1490,7 @@ function pushbutton27_Callback(hObject, eventdata, handles)
 %高斯低通滤波器的传递函数为 ：h=exp(-1/2*(d^2/d0^2));
 %巴特沃斯高通滤波器的传递函数为：h=1/(1+0.414*(d0/d)^(2*level));
 %高斯高通滤波器的传递函数为 ：h=1-exp(-1/2*(d^2/d0^2));
+cla(handles.axes2,'reset');
 global fil;
 %disp(fil);
 global filter;
@@ -1477,8 +1498,10 @@ global filter;
 global bRadius;
 disp(bRadius);
 I=handles.I;
+axes(handles.axes1);
+imshow(I);title('原图像')
 I1=rgb2gray(I);
-axes(handles.axes2);
+axes(handles.axes3);
 imshow(I1);title('灰度图像');
 I2=imnoise(I1,'gaussian',0.03);	 %加均值为0，方差为0.03的高斯噪声
 %I3=double(I2);
@@ -1493,7 +1516,7 @@ switch fil
     case 1
         switch filter
             case 1
-                title1='高斯低通';
+                title1='高斯低通滤波';
                 disp('高斯低通');
                 for i=1:M
                     for j=1:N
@@ -1504,7 +1527,7 @@ switch fil
                 end
                 result1=uint8(real(ifft2(ifftshift(result))));
             case 2
-                title1='高斯高通';
+                title1='高斯高通滤波';
                 disp('高斯高通');
                 for i=1:M
                      for j=1:N
@@ -1518,7 +1541,7 @@ switch fil
     case 2
         switch filter
             case 1
-                title1='巴特沃斯低通';
+                title1='巴特沃斯低通滤波';
                 disp('巴特沃斯低通');
                 for i=1:M
                     for j=1:N
@@ -1529,20 +1552,20 @@ switch fil
                 end
                 result1=uint8(real(ifft2(ifftshift(result))));
             case 2
-                title1='巴特沃斯高通';
+                title1='巴特沃斯高通滤波';
                 disp('巴特沃斯高通');
                 for i=1:M
                      for j=1:N
                          d=sqrt((i-m)^2+(j-n)^2);
-                         h=1/(1+0.414*(d/bRadius)^(2*level));
+                         h=1/(1+0.414*(bRadius/d)^(2*level));
                          result(i,j)=h*shift_I(i,j);
                      end
                 end
                 result1=uint8(real(ifft2(ifftshift(result))));
         end 
 end
-axes(handles.axes3);
-imshow(result1);title(title1);
+axes(handles.axes4);
+imshow(result1);title({[title1,'d=',num2str(bRadius)]});
 
 % --- Executes during object creation, after setting all properties.
 function uipanel1_CreateFcn(hObject, eventdata, handles)
@@ -1993,12 +2016,12 @@ function pushbutton51_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
 Gray=rgb2gray(I);
-%以下程序为对原图像进行行程编码，压缩 ?
+%以下程序为对原图像进行行程编码，压缩 
 Gray_Linear=Gray(:); 
 Gray_Length=length(Gray_Linear); 
 j=1; 
 index(1)=1; 
-for z=1:1:(length(Gray_Linear)-1) %行程编码程序段 ?
+for z=1:1:(length(Gray_Linear)-1) %行程编码程序段 
     if Gray_Linear(z)==Gray_Linear(z+1); 
         index(j)=index(j)+1; 
     else
@@ -2024,7 +2047,7 @@ end
 Encode_hex=dec2hex(Encode_hex);
 Encode_hex_Length=size(Encode_hex,1);%计算行程编码后的所占字节数，Encode_hex_Length
 index_Lenght=length(index);
-CR=Gray_Length/Encode_hex_Length; %比较压缩前与压缩后的大小 ?
+CR=Gray_Length/Encode_hex_Length; %比较压缩前与压缩后的大小
 %行程编码解码 ?
 l=1; 
 for m=1:index_Lenght 
@@ -2097,6 +2120,10 @@ bar(f,h,'k');title('原图直方图');
 axes(handles.axes4);
 [h, f]=hist(y(:));    
 bar(f, h,'k');title('预测误差的直方图');
+% x=uint8(x);
+% xx=uint8(xx);
+% whos('x');
+% whos('xx');
 %编码器%LPCencode函数用一维无损预测编码压缩图像x,a为预测系数，如果a默认，则默认a=１，就是前值预测。
 function y=LPCencode(x, a)
 %error(nargchk(1, 2, nargin));
@@ -2192,6 +2219,7 @@ function pushbutton55_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton55 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+cla(handles.axes2,'reset'); 
 global lossyComCR;%压缩比
 global lossyComTrans;
 cr=0.5;       %压缩比为2:1
@@ -2201,12 +2229,13 @@ switch lossyComCR
     case 2
         cr=0.125;   %8:1
 end
+cr=1;
 I=handles.I;
 I1=rgb2gray(I);
 %这里的图像是384*512，所以分割方式不同
 I1=double(I1)/255;
 whos('I1');
-axes(handles.axes2);
+axes(handles.axes3);
 imshow(I1);title('原图像的灰度图');
 switch lossyComTrans
     case 1 
@@ -2224,12 +2253,14 @@ switch lossyComTrans
         b2=col2im(coe,[8 8],[384 512],'distinct');%重新排列系数矩阵
         %对子图像快进行fft逆变换获得个子图像的复原图像，并显示压缩图像
         I2=blkproc(b2,[8 8],'ifft2(x)');
-        axes(handles.axes3);
+        axes(handles.axes4);
         imshow(I2);title(['(傅里叶)压缩比为',num2str(1/cr),':1的压缩图像']);
         e=double(I1)-double(I2);
         [m,n]=size(e);
         erms=sqrt(sum(e(:).^2)/(m*n));
         set(handles.text43,'String',erms);
+        whos('I1');
+        whos('I2');
     case 3
         %对图像进行哈达吗变换
         t=hadamard(8);
@@ -2247,12 +2278,14 @@ switch lossyComTrans
         %对截取后的变换系数进行哈达吗逆变换
         I2=blkproc(b2,[8 8],'P1*x*P2',t,t);
         I2=I2./(8*8);
-        axes(handles.axes3);
+        axes(handles.axes4);
         imshow(I2);title(['(哈达吗)压缩比为',num2str(1/cr),':1的压缩图像']);
         e=double(I1)-double(I2);
         [m,n]=size(e);
         erms=sqrt(sum(e(:).^2)/(m*n));
         set(handles.text43,'String',erms);
+        whos('I1');
+        whos('I2');
 end
 %axes(handles.axes2);
 %imshow(result1);title(title1);
@@ -2667,3 +2700,10 @@ blocks(1:end,end) = 1;
 axes(handles.axes3);
 imshow (blocks,[]);
 title ('四叉树分解')
+
+
+% --------------------------------------------------------------------
+function Untitled_10_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
