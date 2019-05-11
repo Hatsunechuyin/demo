@@ -598,7 +598,9 @@ function pushbutton7_Callback(hObject, eventdata, handles)
 %try
 %需要哈夫曼编码的源代码
     if  isfield(handles,'I')%判断句柄中的变量是否存在
-        I=handles.I;      
+        I=handles.I;
+        axes(handles.axes1);
+        imshow(I);title('原图像');
         Gray=rgb2gray(I);%转化成灰度的图像
         axes(handles.axes3);
         imshow(Gray);title('灰度图像');
@@ -609,7 +611,7 @@ function pushbutton7_Callback(hObject, eventdata, handles)
         %H=info.h;disp(H);%信息熵
         %CE=info.ce;disp(CE);%编码效率
         axes(handles.axes4);
-        imshow(unzipped);title('解码后的图像');
+        imshow(unzipped);title('解码后的图像(哈夫曼)');
         %disp('平均码长');L=info.maxcodelen
         %disp('压缩比');CR=info.ratio
         set(handles.text34,'String',CR);
@@ -735,20 +737,22 @@ function pushbutton14_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton14 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-I=handles.I;%=======读取图像 显示图像
+I=handles.I;%读取图像 显示图像
+axes(handles.axes1);
+imshow(I);title('原图像');
 I1=rgb2gray(I);
-ii=im2double(I); %=====将图像矩阵类型转换为double（图像计算很多是不能用整型的），没有这个会报错！！ ，如果不用这个就必须转化为灰度图！
-i1 = fft2(ii); %======傅里叶变换
-i2 =fftshift(i1); %======将变换的频率图像四角移动到中心（原来良的部分在四角 现在移动中心，便于后面的处理）
-i3=log(abs(i2)); %=====显示中心低频部分，加对数是为了更好的显示
+ii=im2double(I); %将图像矩阵类型转换为double（图像计算很多是不能用整型的），没有这个会报错！！ ，如果不用这个就必须转化为灰度图！
+i1 = fft2(ii); %傅里叶变换
+i2 =fftshift(i1); %将变换的频率图像四角移动到中心（原来良的部分在四角 现在移动中心，便于后面的处理）
+i3=log(abs(i2)); %显示中心低频部分，加对数是为了更好的显示
 axes(handles.axes2);
 imshow(i3,[]);title('二维傅里叶变换');
-i5 = real(ifft2(ifftshift(i2))); %===频域的图反变换到空域 并取实部
-i6 = im2uint8(mat2gray(i5)); %===取其灰度图
+i5 = real(ifft2(ifftshift(i2))); %频域的图反变换到空域 并取实部
+i6 = im2uint8(mat2gray(i5)); %取其灰度图
 axes(handles.axes3);
 imshow(i6);title('逆变换');
 i7=rgb2gray(I);
-i8=fft2(i7);%===对灰色图才能归一化。因为那是2维矩阵，彩色图是3维矩阵，需要转化为2维灰图
+i8=fft2(i7);%对灰色图才能归一化。因为那是2维矩阵，彩色图是3维矩阵，需要转化为2维灰图
 m=fftshift(i8); %直流分量移到频谱中心
 %RR=real(m); %取傅立叶变换的实部
 %II=imag(m); %取傅立叶变换的虚部
@@ -767,18 +771,20 @@ function pushbutton15_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
+axes(handles.axes1);
+imshow(I);title('原图像');
 J=rgb2gray(I);%将图片转变为灰色图像
 whos('J');
-axes(handles.axes2);
+axes(handles.axes3);
 imshow(J);title('原灰图像');
 K=dct2(J);%对图像做DCT变换
-axes(handles.axes4);
+axes(handles.axes2);
 imshow(log(abs(K))+1,[0,10]);title('DCT变换结果');
 colormap(gray(4));colorbar;
 K(abs(K)<0.1)=0;
 I1=idct2(K)/255;
 whos('K');
-axes(handles.axes3);
+axes(handles.axes4);
 imshow(I1);title('变换后的图片');
 
 % --- Executes on button press in pushbutton16.
@@ -1113,6 +1119,8 @@ function pushbutton23_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
 %I_2D=D3_To_D2(I);
+axes(handles.axes1);
+imshow(I);title('原图像');
 I_2D=rgb2gray(I);
 I1=fft2(I_2D);
 I2=uint8(real(ifft2(I1)));
@@ -2015,6 +2023,8 @@ function pushbutton51_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
+axes(handles.axes1);
+imshow(I);title('原图像');
 Gray=rgb2gray(I);
 %以下程序为对原图像进行行程编码，压缩 
 Gray_Linear=Gray(:); 
@@ -2047,7 +2057,7 @@ end
 Encode_hex=dec2hex(Encode_hex);
 Encode_hex_Length=size(Encode_hex,1);%计算行程编码后的所占字节数，Encode_hex_Length
 index_Lenght=length(index);
-CR=Gray_Length/Encode_hex_Length; %比较压缩前与压缩后的大小
+CR=Encode_hex_Length/Gray_Length; %比较压缩前与压缩后的大小
 %行程编码解码 ?
 l=1; 
 for m=1:index_Lenght 
@@ -2057,10 +2067,10 @@ for m=1:index_Lenght
     end 
 end 
 Decode=reshape(Decode_temp,384,512); %重建二位图像数组 图像的长跟宽，这边使用的图像库图片长度一样384*512
-axes(handles.axes2);
-imshow(Gray);title('原始灰度图'); %显示原图的二值图像 
 axes(handles.axes3);
-imshow(Decode,[]);title('解压缩恢复后的图像'); %显示解压缩恢复后的图像 ?
+imshow(Gray);title('原始灰度图'); %显示原图的二值图像 
+axes(handles.axes4);
+imshow(Decode,[]);title('解压后的图像(行程)'); %显示解压缩恢复后的图像 ?
 set(handles.text34,'String',CR)
 set(handles.text35,'String',Gray_Length)
 set(handles.text37,'String',Encode_hex_Length)
@@ -2412,8 +2422,11 @@ function pushbutton58_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
+% axes(handles.axes1)
+% imshow(I);
+% title('原图像');
 I=rgb2gray(I);
-axes(handles.axes2)
+axes(handles.axes1)
 imshow(I);
 title('灰度图像');
 %axis([50,250,50,200]);grid on; %显示网格线axis on; %显示坐标系
@@ -2425,22 +2438,22 @@ end
 axes(handles.axes2);
 bar(0:255,GP,'g') %绘制直方图
 title('灰度直方图');
-xlabel('灰度值');
-ylabel('出现概率');
-I2=im2bw(I,85/255);
+% xlabel('灰度值');
+% ylabel('出现概率');
+I2=im2bw(I,70/255);
 axes(handles.axes3);
 imshow(I2);
-title('阈值85的分割图像')
+title('阈值70的分割图像')
 %axis([50,250,50,200]);
-grid on; %显示网格线
-axis on, %显示坐标系
+% grid on; %显示网格线
+% axis on, %显示坐标系
 I3=im2bw(I,120/255);
 axes(handles.axes4);
 imshow(I3);
 title('阈值120的分割图像');
 %axis([50,250,50,200]);
-grid on; %显示网格线
-axis on; %显示坐标系仿直效果如阁
+% grid on; %显示网格线
+% axis on; %显示坐标系仿直效果如阁
 
 
 % --- Executes on button press in pushbutton59.
@@ -2677,9 +2690,13 @@ function pushbutton66_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
+axes(handles.axes1);
+imshow (I);
+title ('原图像')
+cla(handles.axes2,'reset');
 I=rgb2gray(I);
 b=imcrop(I,[0,0,256,256]);%必须是2的阶层
-axes(handles.axes2);
+axes(handles.axes3);
 imshow (b,[]);
 title ('正方形灰度图')
 whos('b')
@@ -2697,7 +2714,7 @@ blocks(end,1:end) = 1;
 blocks(1:end,end) = 1;
 %subplot (121) ; 
 %imshow(I),xlabel(' (a)原始图像')
-axes(handles.axes3);
+axes(handles.axes4);
 imshow (blocks,[]);
 title ('四叉树分解')
 
