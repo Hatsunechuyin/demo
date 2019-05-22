@@ -344,3 +344,10 @@ I = imread('C:\Users\Administrator.SC-201902211420\Desktop\1858370454.png');
 
 结构体内容引用自非结构体数组对象：http://tieba.baidu.com/p/3615007847
 图像复原PSF:https://zhidao.baidu.com/question/542203729.html
+==========================5.13=====================================
+你先用GUI编辑第二个界面，保存命名如wenjian，在第一个按钮的回调函数中写如下语句：
+h=gcf;
+wenjian;
+close(h);
+然后保存，运行这个按钮界面，点击按钮就可以出现“wenjian”
+这个界面了。

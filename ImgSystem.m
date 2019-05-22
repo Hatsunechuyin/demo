@@ -22,7 +22,7 @@ function varargout = ImgSystem(varargin)
 
 % Edit the above text to modify the response to help ImgSystem
 
-% Last Modified by GUIDE v2.5 07-May-2019 11:27:36
+% Last Modified by GUIDE v2.5 17-May-2019 20:26:15
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -364,9 +364,33 @@ function pushbutton3_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 try
     if  isfield(handles,'I')%判断句柄中的变量是否存在
+%         set(handles.axes2,'visible','off');
+%         set(handles.axes3,'visible','off');
+%         set(handles.axes4,'visible','off');
+%         cla(handles.axes2);
+%         set(gca,'Visible','off');
+%                 cla(handles.axes3);
+%         set(gca,'Visible','off');
+%                 cla(handles.axes4);
+%         set(gca,'Visible','off');
+
+%         axes(handles.axes3);
+        A(:,:,1)=0.9412;
+        A(:,:,2)=0.9412;
+        A(:,:,3)=0.9412;
+        axes(handles.axes1)
+        imshow(A);
+        axes(handles.axes2)
+        imshow(A);
+        axes(handles.axes3)
+        imshow(A);
+        axes(handles.axes4)
+        imshow(A);
         global y;%获取全局的变量，也就是文本框里面的
         global x;
         I=handles.I;%打开的图像的句柄
+        axes(handles.axes1);
+        imshow(I);title('原图像');
         axes(handles.axes2);%表示的是将上面的坐标轴做为当前坐标轴,在其上做图.
         se=translate(strel(1),[x y]);  
         j=imdilate(I,se); 
@@ -407,7 +431,10 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 try
     if  isfield(handles,'I')%判断句柄中的变量是否存在
-        set(handles.text3,'String','剪切的图片');
+%         set(handles.text3,'String','剪切的图片');
+        set(handles.axes2,'visible','off');
+        set(handles.axes3,'visible','off');
+        set(handles.axes4,'visible','off');
         axes(handles.axes3);%将第三块axes当作剪切对象
         A=handles.I;
         [I1,rect]=imcrop(A);
@@ -458,20 +485,34 @@ try
     if isempty(v_image)
         v_image=1;
     end
-    disp(handles);%测试打印用的
-    whos;
+%     disp(handles);%测试打印用的
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+%         axes(handles.axes1)
+%         imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
     if  isfield(handles,'I')%判断句柄中的变量是否存在
         %disp(v_image);%测试打印用的
         switch v_image   %实现下拉列表需要写改语法
             case 1 
                 I=handles.I;
                 J1=flipdim(I,2);%原图像的水平镜像
+                axes(handles.axes1);
+                imshow(I);title('原图像');
                 axes(handles.axes2);
                 imshow(J1);title('水平镜像');
                 %guidata(hObject,handles);%储存handles
             case 2 
                 I=handles.I;
                 J2=flipdim(I,1);%原图像的垂直镜像
+                axes(handles.axes1);
+                imshow(I);title('原图像');
                 axes(handles.axes2);
                 imshow(J2);title('垂直镜像');
                 %guidata(hObject,handles);
@@ -479,6 +520,8 @@ try
                 I=handles.I;
                 J3=flipdim(I,1);%原图像的水平垂直镜像
                 J4=flipdim(J3,2);
+                axes(handles.axes1);
+                imshow(I);title('原图像');
                 axes(handles.axes2);
                 imshow(J4);title('水平垂直镜像');
                 %guidata(hObject,handles);
@@ -522,7 +565,11 @@ global lossyComCR;%压缩比
 lossyComCR=0;%对应第一个
 global lossyComTrans;
 lossyComTrans=1;
-disp('handles')
+global variance1;
+variance1=0.05;%方差也是噪声密度，椒盐的默认
+global matrix1;
+matrix1=3;%
+% disp('handles')
 % set(uipanel1,'Visible','on');
 % set(uipanel3,'Visible','off');
 % set(uipanel4,'Visible','off');
@@ -540,7 +587,20 @@ function pushbutton6_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 try
     if  isfield(handles,'I')%判断句柄中的变量是否存在
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+%         axes(handles.axes1)
+%         imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
         I=handles.I;
+        axes(handles.axes1);
+        imshow(I);title('原图像');
         global rotate;%获取全局的变量，也就是文本框里面的
         r=imrotate(I,rotate,'nearest');%用邻插值法旋转图片
         axes(handles.axes2);
@@ -548,6 +608,10 @@ try
         %set(0,'defaultFigureColor',[1 1 1]);%设置窗口颜色
         imshow(r);title({['旋转的角度:', num2str(rotate),'°']});
         axis on;                  %显示坐标系
+%         figure('name','原图像比例'); 
+%         imshow(I);title('原图像');
+%         figure('name','旋转后的图像'); 
+%         imshow(r);title({['旋转的角度:', num2str(rotate),'°']});
     else
         warndlg('没有剪切的图像');
     end
@@ -703,15 +767,31 @@ function pushbutton11_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 %维纳滤波复原图像
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+axes(handles.axes1)
+imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
 I=handles.I;
+axes(handles.axes1);
+imshow(I);title('原图像');%显示复原图像
+I=rgb2gray(I);
+axes(handles.axes2);
+imshow(I);title('灰度图像');%显示复原图像
 len=28;%运动位移
 theta=14;%运动角度
 PSF=fspecial('motion',len,theta);
 blurred=imfilter(I,PSF,'conv','circular');%读入无噪声模糊图像，并命名blurred
 wnrl=deconvwnr(blurred,PSF,0.0005);%维纳滤波复原图像
-axes(handles.axes2);
-imshow(blurred);title('由运动形成模糊图像');%显示模糊图像
 axes(handles.axes3);
+imshow(blurred);title('由运动形成模糊图像');%显示模糊图像
+axes(handles.axes4);
 imshow(wnrl);title('维纳滤波复原图像');%显示复原图像
 
 % --- Executes on button press in pushbutton13.
@@ -721,6 +801,17 @@ function pushbutton13_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
 I=rgb2gray(I);%转化为灰度图像
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+%         axes(handles.axes1)
+%         imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
 J=imnoise(I,'salt & pepper',0.04);%对图像增加椒盐噪声，强度为0.04
 axes(handles.axes3);    %显示在axex2框中
 imshow(J); title('受椒盐噪声污染图片');
@@ -762,7 +853,7 @@ A=(A-min(min(A)))/(max(max(A))-min(min(A)))*225; %归一化
 axes(handles.axes4);
 imshow(A); %显示原图像
 colorbar; %显示图像的颜色条
-title('频谱图'); %图像命名
+title('灰度频谱图'); %图像命名
 
 %DCT变换
 % --- Executes on button press in pushbutton15.
@@ -785,7 +876,7 @@ K(abs(K)<0.1)=0;
 I1=idct2(K)/255;
 whos('K');
 axes(handles.axes4);
-imshow(I1);title('变换后的图片');
+imshow(I1);title('压缩后重构的图像');
 
 % --- Executes on button press in pushbutton16.
 function pushbutton16_Callback(hObject, eventdata, handles)
@@ -867,8 +958,23 @@ function pushbutton18_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton18 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+axes(handles.axes1)
+imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
 I=handles.I;
+axes(handles.axes1);
+imshow(I);title('原图像')
 I_gray=rgb2gray(I);%转换为灰度图
+axes(handles.axes3);
+imshow(I_gray);title('灰度图像')
 I_double=double(I_gray);%转换为双精度
 [wid,len]=size(I_gray);%图像的大小
 colorLevel=256;%灰度级
@@ -924,8 +1030,8 @@ for i=1:wid
          end
      end
 end
-axes(handles.axes2);
-imshow(bin);
+axes(handles.axes4);
+imshow(bin);title('最大类间方差')
 
 
 % --- Executes on button press in pushbutton19.
@@ -1002,12 +1108,29 @@ function pushbutton20_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 try
     if  isfield(handles,'I')%判断句柄中的变量是否存在
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+%         axes(handles.axes1)
+%         imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
         global res;%获取全局的变量，缩放比例
         I=handles.I;%打开的图像的句柄
+        axes(handles.axes1);   
+        imshow(I);title('原图像');
         axes(handles.axes2);%表示的是将上面的坐标轴做为当前坐标轴,在其上做图.      
         im0 = imresize(I,res);%进行缩放到原来的res倍
         imshow(im0);title({['缩放比例:', num2str(res)]}');
         axis on;                  %显示坐标系
+        figure('name','原图像比例'); 
+        imshow(I);title('原图像');
+        figure('name','缩放后的图像'); 
+        imshow(im0);title({['缩放比例:', num2str(res)]}');
     else
         warndlg('没有剪切的图像');
     end
@@ -1071,16 +1194,31 @@ function pushbutton22_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton22 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+axes(handles.axes1)
+imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
 I=handles.I;
-%I=rgb2gray(I);
+axes(handles.axes1);
+imshow(I);title('原图像');
+I=rgb2gray(I);
+axes(handles.axes2);
+imshow(I);title('灰度图像');
 fb=tofloat(I);  	%将图像转化为浮点型
 %lapmask=[1 1 1;1 -8 1;1 1 1]; 	%拉普拉斯滤波模板
 lapmask=[0,1,0;1,-4,1;0,1,0];
 fen=imfilter(fb,lapmask,'replicate');%对任意类型数组或多维图像进行滤波
 fen1=fb-fen;
-axes(handles.axes2);
-imshow(fen);title('图像的边缘');
 axes(handles.axes3);
+imshow(fen);title('图像的边缘');
+axes(handles.axes4);
 imshow(fen1);title('拉普拉斯锐化');
 function [out,revertclass] = tofloat(inputimage)
 %Copy the book of Gonzales
@@ -1177,44 +1315,59 @@ function popupmenu3_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu3 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu3
 %try
-    whos;
     if  isfield(handles,'I')%判断句柄中的变量是否存在
+        A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+%         axes(handles.axes1)
+%         imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
         I=handles.I;
-        %I=rgb2gray(I);%转换为灰度图
-        J=imnoise(I,'salt & pepper',0.02);
+        axes(handles.axes1);
+        imshow(I);title('原图像');
+        I=rgb2gray(I);%转换为灰度图
         axes(handles.axes2);
+        imshow(I);title('灰度图像');
+        J=imnoise(I,'salt & pepper',0.02);
+        axes(handles.axes3);
         imshow(J);title('添加椒盐噪声图像');
         %disp(get(hObject,'value'));%测试打印用的
         switch get(hObject,'value')   %实现下拉列表需要写改语法   %实现下拉列表需要写改语法
             case 1    
             case 2 
-                %K1=filter2(fspecial('average',3),J);%进行3*3模板平滑滤波
-                for i=1:3
-                    K1(:,:,i)=filter2(fspecial('average',3),J(:,:,i))/255;
-                end
-                axes(handles.axes3);
+                %K1=filter2(fspecial('average',3),J);%进行3*3模板平滑滤波     
+                K1=filter2(fspecial('average',3),J)/255;
+                axes(handles.axes4);
                 imshow(K1);title('3*3模板平滑滤波');
                 %guidata(hObject,handles);%储存handles
             case 3 
-                for i=1:3
-                    K1(:,:,i)=filter2(fspecial('average',5),J(:,:,i))/255;
-                end
-                axes(handles.axes3);
+%                 for i=1:3
+%                     K1(:,:,i)=filter2(fspecial('average',5),J(:,:,i))/255;%在RGB图里可以用
+%                 end
+                K1=filter2(fspecial('average',5),J)/255;
+                axes(handles.axes4);
                 imshow(K1);title('5*5模板平滑滤波');
                 %guidata(hObject,handles);
             case 4
-                for i=1:3
-                    K1(:,:,i)=filter2(fspecial('average',7),J(:,:,i))/255;
-                end
-                axes(handles.axes3);
+%                 for i=1:3
+%                     K1(:,:,i)=filter2(fspecial('average',7),J(:,:,i))/255;
+%                 end
+                K1=filter2(fspecial('average',7),J)/255;
+                axes(handles.axes4);
                 imshow(K1);title('7*7模板平滑滤波');;
                 %guidata(hObject,handles);
             case 5
-                 for i=1:3
-                    K1(:,:,i)=filter2(fspecial('average',9),J(:,:,i))/255;
-                end
-                axes(handles.axes3);
-                imshow(K1);title('9*9模板平滑滤波');;
+%                  for i=1:3
+%                     K1(:,:,i)=filter2(fspecial('average',9),J(:,:,i))/255;
+%                  end
+                 K1=filter2(fspecial('average',9),J)/255;
+                axes(handles.axes4);
+                imshow(K1);title('9*9模板平滑滤波');
                 %guidata(hObject,handles);
         end
     else
@@ -1244,6 +1397,17 @@ function pushbutton24_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
 I1=rgb2gray(I);
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+%         axes(handles.axes1)
+%         imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
 axes(handles.axes1);
 imshow(I1);title('原图灰度图像');
 axes(handles.axes3);
@@ -1295,7 +1459,9 @@ function Untitled_11_Callback(hObject, eventdata, handles)
 % hObject    handle to Untitled_11 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+% h=gcf;
+% threshold;
+% close(h);
 
 % --------------------------------------------------------------------
 function save_1_Callback(hObject, eventdata, handles)
@@ -1352,6 +1518,17 @@ function pushbutton25_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
 I1=rgb2gray(I);
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+%         axes(handles.axes1)
+%         imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
 axes(handles.axes1);
 imshow(I1);title('原图像的灰度图像');
 axes(handles.axes3);
@@ -1368,9 +1545,22 @@ function pushbutton26_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton26 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+axes(handles.axes1)
+imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
 x=handles.I;
+axes(handles.axes1);
+imshow(x);title('原图像');
 x=rgb2gray(x);
-axes(handles.axes2);
+axes(handles.axes3);
 imshow(uint8(x));title('灰度图像');
 [m,n]=size(x); 
 x=double(x); 
@@ -1383,7 +1573,7 @@ for i=1:m-2
         b(i+1,j+1)=sqrt(b(i+1,j+1)^2+c(i+1,j+1)^2)+100; 
     end
 end
-axes(handles.axes3);
+axes(handles.axes4);
 imshow(uint8(b));title('梯度算子');
 
 
@@ -1506,6 +1696,9 @@ global filter;
 global bRadius;
 disp(bRadius);
 I=handles.I;
+set(handles.axes2,'visible','off');
+set(handles.axes3,'visible','off');
+set(handles.axes4,'visible','off');
 axes(handles.axes1);
 imshow(I);title('原图像')
 I1=rgb2gray(I);
@@ -1631,9 +1824,26 @@ function pushbutton35_Callback(hObject, eventdata, handles)
 % Z=ifftshift(Z);
 % Z=abs(ifft2(Z));
 % Z=Z(1:size(X,1),1:size(X,2));
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+axes(handles.axes1)
+imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
 image_o = handles.I;
+axes(handles.axes1)
+imshow(image_o);
+title('原图像');
 image_o=imcrop(image_o,[0,0,384,448]);
 image_o=rgb2gray(image_o);
+axes(handles.axes2)
+imshow(image_o);
+title('灰度图像');
 %频率域退化图像，退化函数H(u,v)=exp(-0.0025*( (u-M/2).^2+(v-N/2).^2).^(5/6) )
 %傅里叶变换
 f=im2double(image_o);
@@ -1650,7 +1860,7 @@ F=F.*H;
 X=ifftshift(F);
 x=ifft2(X);
 x=uint8(abs(x)*256);
-axes(handles.axes2)
+axes(handles.axes3)
 imshow(x);
 title('退化图像');
 %ff=im2double(image_d);%将图像灰度值归一化到0-1之间
@@ -1679,8 +1889,8 @@ end
 fH_Id1=ifftshift(fH_Id);
 f_new=ifft2(fH_Id1);
 f_new=uint8(abs(f_new)*255);
-axes(handles.axes3)
-whos('f_new')
+axes(handles.axes4)
+% whos('f_new')
 imshow(f_new);
 title('滤波半径=78的逆滤波复原图像');
 
@@ -1690,7 +1900,25 @@ function pushbutton36_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton36 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+axes(handles.axes1)
+imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
 X=handles.I;
+axes(handles.axes1);
+imshow(X);title('原图像')%画出增强图像
+% cla(handles.axes2,'reset');
+% cla(handles.axes4,'reset');
+X=rgb2gray(X);
+axes(handles.axes3);
+imshow(X);title('原灰度图像')%画出增强图像
 [c,s]=wavedec2(X,3,'sym4');  %进行二层小波分解
 len=length(c);
 justdet = prod(s(1,:));%截取细节系数起始位置（不处理近似系数）  
@@ -1707,7 +1935,7 @@ for I =justdet:len
     end
 end
 nx=waverec2(c,s,'sym4');%分解系数重构
-axes(handles.axes2);
+axes(handles.axes4);
 imshow(uint8(nx));title('增强图像')%画出增强图像
 
 % --- Executes on button press in pushbutton37.
@@ -1887,9 +2115,22 @@ function popupmenu10_Callback(hObject, eventdata, handles)
 % hObject    handle to popupmenu10 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+axes(handles.axes1)
+imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
 I=handles.I;
+axes(handles.axes1);
+imshow(I);title('原图像')
 x=rgb2gray(I);
-axes(handles.axes2);
+axes(handles.axes3);
 imshow(uint8(x));title('灰度图像')
 switch get(hObject,'value')
     case 1
@@ -1903,7 +2144,7 @@ switch get(hObject,'value')
                 J(i,j)=abs(M(i-1,j+1)-M(i-1,j-1)+2*M(i,j+1)-2*M(i,j-1)+M(i+1,j+1)-M(i+1,j-1))+abs(M(i-1,j-1)-M(i+1,j-1)+2*M(i-1,j)-2*M(i+1,j)+M(i-1,j+1)-M(i+1,j+1));
             end
         end
-        axes(handles.axes3);
+        axes(handles.axes4);
         imshow(uint8(J));title('Sobel算子')
     case 3
         disp('Prewitt算子');
@@ -1928,7 +2169,7 @@ switch get(hObject,'value')
         %        %end 
         %    end 
         %end
-        axes(handles.axes3);
+        axes(handles.axes4);
         imshow(uint8(J));title('Prewitt算子')
     case 4
         disp('Isotropic算子');
@@ -1957,7 +2198,7 @@ switch get(hObject,'value')
                 J(i,j)=abs(M(i-1,j+1)-M(i-1,j-1)+sqrt(2)*M(i,j+1)-sqrt(2)*M(i,j-1)+M(i+1,j+1)-M(i+1,j-1))+abs(M(i+1,j-1)-M(i-1,j-1)+sqrt(2)*M(i+1,j)-sqrt(2)*M(i-1,j)+M(i+1,j+1)-M(i-1,j+1));
             end
         end
-        axes(handles.axes3);
+        axes(handles.axes4);
         imshow(uint8(J));title('Isotropic算子')
 end
 
@@ -2229,7 +2470,18 @@ function pushbutton55_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton55 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-cla(handles.axes2,'reset'); 
+% cla(handles.axes2,'reset'); 
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+axes(handles.axes1)
+imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
 global lossyComCR;%压缩比
 global lossyComTrans;
 cr=0.5;       %压缩比为2:1
@@ -2239,17 +2491,20 @@ switch lossyComCR
     case 2
         cr=0.125;   %8:1
 end
-cr=1;
+% cr=1;
 I=handles.I;
+axes(handles.axes1);
+imshow(I);title('原图像');
 I1=rgb2gray(I);
 %这里的图像是384*512，所以分割方式不同
 I1=double(I1)/255;
-whos('I1');
+% cr
+% lossyComTrans
 axes(handles.axes3);
 imshow(I1);title('原图像的灰度图');
 switch lossyComTrans
-    case 1 
-    case 2
+%     case 1 
+    case 1
         fftcoe=blkproc(I1,[8 8],'fft2(x)');%将图片分割成8*8的子图像进行fft48*64个
         coevar=im2col(fftcoe,[8 8],'distinct');%将变换系数矩阵重新排列
         coe=coevar;
@@ -2271,7 +2526,7 @@ switch lossyComTrans
         set(handles.text43,'String',erms);
         whos('I1');
         whos('I2');
-    case 3
+    case 2
         %对图像进行哈达吗变换
         t=hadamard(8);
         htcoe=blkproc(I1,[8 8],'P1*x*P2',t,t);
@@ -2314,9 +2569,22 @@ function pushbutton56_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 %改进的分水岭分割（之前的梯度图中有过多的局部极小点）
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+axes(handles.axes1)
+imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
 I=handles.I;
+axes(handles.axes1);
+imshow(I);title('原图像');
 I=rgb2gray(I);
-axes(handles.axes2);
+axes(handles.axes3);
 imshow(I);title('灰度图像');
 %计算灰度图
 I=double(I);
@@ -2346,7 +2614,7 @@ L2=watershed(g2);
 wr2=L2==0;
 %subplot(236);
 I(wr2)=255;
-axes(handles.axes3);
+axes(handles.axes4);
 imshow(uint8(I));title('分割结果');
 
 
@@ -2421,6 +2689,7 @@ function pushbutton58_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton58 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+%{
 I=handles.I;
 % axes(handles.axes1)
 % imshow(I);
@@ -2454,7 +2723,19 @@ title('阈值120的分割图像');
 %axis([50,250,50,200]);
 % grid on; %显示网格线
 % axis on; %显示坐标系仿直效果如阁
-
+%}
+try
+    global fenge;
+    fenge=1;
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        fenge=handles.I;%打开的图像的句柄
+    end
+    h=gcf;
+    threshold;
+    close(h);
+catch
+    %warndlg('您得输入一幅图像');
+end
 
 % --- Executes on button press in pushbutton59.
 function pushbutton59_Callback(hObject, eventdata, handles)
@@ -2572,15 +2853,17 @@ function pushbutton63_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 I=handles.I;
 I=rgb2gray(I);
-PSF=fspecial('gaussian',5,5);
+axes(handles.axes2);
+imshow(I);title('灰度图像')
+PSF=fspecial('gaussian',10,10);
 Blurred=imfilter(I,PSF,'symmetric','conv');
 V=0.003;
 BN=imnoise(Blurred,'gaussian',0,V);
 luc=deconvlucy(BN,PSF,5);
-axes(handles.axes2);
-imshow(Blurred);title('模糊后的图像')
+% axes(handles.axes2);
+% imshow(Blurred);title('模糊后的图像')
 axes(handles.axes3);
-imshow(BN);title('加噪后的图像')
+imshow(BN);title('模糊加噪后的图像')
 axes(handles.axes4);
 imshow(luc);title('恢复后的图像')
 
@@ -2610,35 +2893,48 @@ function popupmenu13_Callback(hObject, eventdata, handles)
 % hObject    handle to popupmenu13 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+axes(handles.axes1)
+imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
 I=handles.I;
+axes(handles.axes1);    %显示在axes2框中
+imshow(I);title('原图像');
 I=rgb2gray(I);
-axes(handles.axes2);    %显示在axes2框中
+axes(handles.axes3);    %显示在axes2框中
 imshow(I);title('灰度图像');
 switch get(hObject,'value')
     case 1
     case 2
         BW5=edge(I,'sobel');%进行canny算子边缘检测，门限值采用默认值
-        axes(handles.axes3);    %显示在axes2框中
+        axes(handles.axes4);    %显示在axes2框中
         imshow(BW5,[]);title('Sobel算子');
     case 3
         BW5=edge(I,'roberts');%进行canny算子边缘检测，门限值采用默认值
-        axes(handles.axes3);    %显示在axes2框中
+        axes(handles.axes4);    %显示在axes2框中
         imshow(BW5,[]);title('Roberts算子');
     case 4
         BW5=edge(I,'prewitt');%进行canny算子边缘检测，门限值采用默认值
-        axes(handles.axes3);    %显示在axes2框中
+        axes(handles.axes4);    %显示在axes2框中
         imshow(BW5,[]);title('Prewitt算子');
     case 5
         BW5=edge(I,'log');%进行canny算子边缘检测，门限值采用默认值
-        axes(handles.axes3);    %显示在axes2框中
+        axes(handles.axes4);    %显示在axes2框中
         imshow(BW5,[]);title('LOG算子');
     case 6
         BW5=edge(I,'canny');%进行canny算子边缘检测，门限值采用默认值
-        axes(handles.axes3);    %显示在axes2框中
+        axes(handles.axes4);    %显示在axes2框中
         imshow(BW5,[]);title('Canny算子');
     case 7
         BW5=edge(I,'zerocross');%进行canny算子边缘检测，门限值采用默认值
-        axes(handles.axes3);    %显示在axes2框中
+        axes(handles.axes4);    %显示在axes2框中
         imshow(BW5,[]);title('Zerocross算子');
 end
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu13 contents as cell array
@@ -2663,24 +2959,44 @@ function pushbutton65_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton65 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+% cla(handles.axes2,'reset');
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+axes(handles.axes1)
+imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
 I=handles.I;
+axes(handles.axes1);
+imshow(I);title('原图像');
 I=rgb2gray(I);
 I=im2double(I);
 T0=0.01;  %参数TO
 T1=(min(I(:))+max(I(:)))/2;
+% disp(I(:));
+% disp(max(I(:)));
+% disp(min(I(:)));
+% disp(T1);
 r1=find(I>T1) ;
 r2=find(I<=T1) ;
 T2= (mean(I(r1))+mean(I(r2)))/2;
-while abs(T2-T1)<T0  %迭代求阈值
+disp(T2);
+while abs(T2-T1)>T0  %迭代求阈值
       T1=T2;
       r1=find(I>T1);
       r2=find(I<=T1) ;
       T2=(mean(I(r1))+mean(I(r2)))/2;
 end
+disp(T2);
 J=im2bw(I,T2) ;  %图像分割
-axes(handles.axes2);
-imshow(I);title('灰度图像');
 axes(handles.axes3);
+imshow(I);title('灰度图像');
+axes(handles.axes4);
 imshow(J);title('迭代法求阈值分割图像');
 
 
@@ -2689,11 +3005,22 @@ function pushbutton66_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton66 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+A(:,:,1)=0.9412;
+A(:,:,2)=0.9412;
+A(:,:,3)=0.9412;
+axes(handles.axes1)
+imshow(A);
+axes(handles.axes2)
+imshow(A);
+axes(handles.axes3)
+imshow(A);
+axes(handles.axes4)
+imshow(A);
 I=handles.I;
 axes(handles.axes1);
 imshow (I);
 title ('原图像')
-cla(handles.axes2,'reset');
+% cla(handles.axes2,'reset');
 I=rgb2gray(I);
 b=imcrop(I,[0,0,256,256]);%必须是2的阶层
 axes(handles.axes3);
@@ -2724,3 +3051,295 @@ function Untitled_10_Callback(hObject, eventdata, handles)
 % hObject    handle to Untitled_10 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+
+function edit17_Callback(hObject, eventdata, handles)
+% hObject    handle to edit17 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global variance1;%定义一个x的全局变量
+variance1=str2num(get(hObject,'String'));
+% Hints: get(hObject,'String') returns contents of edit17 as text
+%        str2double(get(hObject,'String')) returns contents of edit17 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit17_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit17 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pushbutton69.
+function pushbutton69_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton69 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+try
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        global variance1;
+        variance=variance1;
+        global matrix1;
+        matrix=matrix1;
+        if isempty(variance)
+            warndlg('请重新输入，必须是输入数字！');
+        % elseif isnan(variance)
+        %     warndlg('请输入数字')
+%         elseif isempty(matrix)
+%             warndlg('请重新输入，必须是输入数字！');
+%         elseif matrix<=2 || mod(matrix,2)==0
+%             warndlg('必须为单数矩阵！');
+        elseif variance<0 || variance >1
+            warndlg('请重新输入，必须是0-1之间的数值！');
+        else
+            global pic;
+            A(:,:,1)=0.9412;
+            A(:,:,2)=0.9412;
+            A(:,:,3)=0.9412;
+            %         axes(handles.axes1)
+            %         imshow(A);
+            axes(handles.axes2)
+            imshow(A);
+            axes(handles.axes3)
+            imshow(A);
+            axes(handles.axes4)
+            imshow(A);
+            I=handles.I;
+            I=rgb2gray(I);%转化为灰度图像
+            J=imnoise(I,'salt & pepper',variance);%对图像增加椒盐噪声，强度为0.04
+            pic=J;
+            axes(handles.axes3)
+            imshow(J);title('椒盐噪声');
+        end
+    else
+        warndlg('请先输入图像！');
+    end
+catch
+    %warndlg('您得输入一幅图像');
+end
+
+
+function edit18_Callback(hObject, eventdata, handles)
+% hObject    handle to edit18 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global matrix1;
+matrix1=str2num(get(hObject,'String'));
+% Hints: get(hObject,'String') returns contents of edit18 as text
+%        str2double(get(hObject,'String')) returns contents of edit18 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit18_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit18 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in pushbutton70.
+function pushbutton70_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton70 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+try
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        global pic;
+        global matrix1;
+        matrix=matrix1;
+        I=handles.I;
+        I=rgb2gray(I);%转化为灰度图像
+        if isempty(pic)
+            pic=I
+        end
+        if isempty(matrix)
+            warndlg('请重新输入，必须是输入数字！');
+%         elseif matrix<=2 || mod(matrix,2)==0
+%             warndlg('必须为单数矩阵！');
+        elseif rem(matrix,1)
+             warndlg('必须输入整数！');
+        else
+            A(:,:,1)=0.9412;
+            A(:,:,2)=0.9412;
+            A(:,:,3)=0.9412;
+            %         axes(handles.axes1)
+            %         imshow(A);
+            axes(handles.axes2)
+            imshow(A);
+            axes(handles.axes3)
+            imshow(A);
+            axes(handles.axes4)
+            imshow(A);
+            axes(handles.axes2);    %显示在axex2框中
+            imshow(I); title('灰度图像');
+            axes(handles.axes3);    %显示在axex2框中
+            imshow(pic); title('处理前的图像');
+            K=medfilt2(pic,[matrix,matrix]);          %二维中值滤波
+            axes(handles.axes4);
+            imshow(K);title({['中值滤波:矩阵[',num2str(matrix),'*',num2str(matrix),']']});
+        end
+    else
+        warndlg('请先输入图像！');
+    end
+catch
+    %warndlg('您得输入一幅图像');
+end
+
+
+% --- Executes on button press in pushbutton71.
+function pushbutton71_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton71 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+try
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        global pic;
+        global matrix1;
+        matrix=matrix1;
+        I=handles.I;
+        I=rgb2gray(I);%转化为灰度图像
+        if isempty(pic)
+            pic=I
+        end
+        if isempty(matrix)
+            warndlg('请重新输入，必须是输入数字！');
+%         elseif matrix<=2 || mod(matrix,2)==0
+%             warndlg('必须为单数矩阵！');
+        elseif rem(matrix,1)
+             warndlg('必须输入整数！');
+        else
+            A(:,:,1)=0.9412;
+            A(:,:,2)=0.9412;
+            A(:,:,3)=0.9412;
+            %         axes(handles.axes1)
+            %         imshow(A);
+            axes(handles.axes2)
+            imshow(A);
+            axes(handles.axes3)
+            imshow(A);
+            axes(handles.axes4)
+            imshow(A);
+            axes(handles.axes2);    %显示在axex2框中
+            imshow(I); title('灰度图像');
+            axes(handles.axes3);    %显示在axex2框中
+            imshow(pic); title('处理前的图像');
+            K=filter2(fspecial('average',matrix),pic)/255;          %二维中值滤波
+            axes(handles.axes4);
+            imshow(K);title({['均值滤波:矩阵[',num2str(matrix),'*',num2str(matrix),']']});
+        end
+    else
+        warndlg('请先输入图像！');
+    end
+catch
+    %warndlg('您得输入一幅图像');
+end
+
+
+% --- Executes on button press in pushbutton72.
+function pushbutton72_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton72 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+try
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        global pic;
+        global matrix1;
+        matrix=matrix1;
+        I=handles.I;
+        I=rgb2gray(I);%转化为灰度图像
+        if isempty(pic)
+            pic=I
+        end
+        if isempty(matrix)
+            warndlg('请重新输入，必须是输入数字！');
+%         elseif matrix<=2 || mod(matrix,2)==0
+%             warndlg('必须为单数矩阵！');
+        elseif rem(matrix,1)
+             warndlg('必须输入整数！');
+        else
+            A(:,:,1)=0.9412;
+            A(:,:,2)=0.9412;
+            A(:,:,3)=0.9412;
+            %         axes(handles.axes1)
+            %         imshow(A);
+            axes(handles.axes2)
+            imshow(A);
+            axes(handles.axes3)
+            imshow(A);
+            axes(handles.axes4)
+            imshow(A);
+            axes(handles.axes2);    %显示在axex2框中
+            imshow(I); title('灰度图像');
+            axes(handles.axes3);    %显示在axex2框中
+            imshow(pic); title('处理前的图像');
+            K=wiener2(pic,[matrix1 matrix1]);          %二维中值滤波
+            axes(handles.axes4);
+            imshow(K);title({['均值滤波:矩阵[',num2str(matrix),'*',num2str(matrix),']']});
+        end
+    else
+        warndlg('请先输入图像！');
+    end
+catch
+    %warndlg('您得输入一幅图像');
+end
+
+
+% --- Executes on button press in pushbutton73.
+function pushbutton73_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton73 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+try
+    if  isfield(handles,'I')%判断句柄中的变量是否存在
+        global variance1;
+        variance=variance1;
+        global matrix1;
+        matrix=matrix1;
+        if isempty(variance)
+            warndlg('请重新输入，必须是输入数字！');
+        % elseif isnan(variance)
+        %     warndlg('请输入数字')
+%         elseif isempty(matrix)
+%             warndlg('请重新输入，必须是输入数字！');
+%         elseif matrix<=2 || mod(matrix,2)==0
+%             warndlg('必须为单数矩阵！');
+        elseif variance<0 || variance >1
+            warndlg('请重新输入，必须是0-1之间的数值！');
+        else
+            global pic;
+            A(:,:,1)=0.9412;
+            A(:,:,2)=0.9412;
+            A(:,:,3)=0.9412;
+            %         axes(handles.axes1)
+            %         imshow(A);
+            axes(handles.axes2)
+            imshow(A);
+            axes(handles.axes3)
+            imshow(A);
+            axes(handles.axes4)
+            imshow(A);
+            I=handles.I;
+            I=rgb2gray(I);%转化为灰度图像
+            J=imnoise(I,'gaussian',0,variance);%给灰度图像添加高斯白噪声，均值为0.方差为0.025
+            pic=J;
+            axes(handles.axes3)
+            imshow(J);title('椒盐噪声');
+        end
+    else
+        warndlg('请先输入图像！');
+    end
+catch
+    %warndlg('您得输入一幅图像');
+end
